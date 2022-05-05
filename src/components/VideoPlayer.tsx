@@ -87,7 +87,7 @@ export default class CustomVideoPlayer extends Component<any> {
                         style={{ width: "100%", height: hp(30), borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: Colors.grey3 }}
                         poster={"https://i.ibb.co/XtrVN0p/download.png"}
                         posterResizeMode='cover'
-                        resizeMode="contain"
+                        resizeMode='cover'
                         onVideo
                         onLoad={this.handleLoad}
                         onProgress={this.handleProgress}
