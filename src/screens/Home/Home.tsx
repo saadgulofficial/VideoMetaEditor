@@ -9,7 +9,7 @@ import { CommonServices } from '../../services'
 import moment from 'moment'
 import { Loader } from '../../components'
 
-const Home = () => {
+const Home = ({ navigation }) => {
     const [videos, setVideos] = useState([])
     const [loader, setLoader] = useState(false)
 
@@ -59,12 +59,16 @@ const Home = () => {
         return () => cleanup
     }, [])
 
+    const onVideoPress = (item) => navigation.navigate('VideoDetail', { videoDetail: item })
     const renderVideos = ({ item }) => {
         const { timestamp, image } = item.node
         const { uri, filename, playableDuration } = image
 
         return (
-            <View style={Style.videoItemContainer}>
+            <TouchableOpacity style={Style.videoItemContainer}
+                activeOpacity={0.8}
+                onPress={onVideoPress.bind(null, item.node)}
+            >
                 <View style={Style.videoThumbnailCon}>
                     <Image
                         source={{ uri }}
@@ -85,7 +89,7 @@ const Home = () => {
                 <Text style={{ ...Typography.reg, ...Style.videoDate }}>
                     {moment.unix(timestamp).format('MMM Do YYYY, h:mm A')}
                 </Text>
-            </View>
+            </TouchableOpacity>
         )
     }
 

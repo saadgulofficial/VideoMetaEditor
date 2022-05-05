@@ -22,7 +22,7 @@ export default StyleSheet.create({
         paddingTop: hp(2)
     },
     videoItemContainer: {
-        marginBottom: hp(5)
+        marginBottom: hp(5),
     },
     videoThumbnailCon: {
         paddingBottom: hp(1),
