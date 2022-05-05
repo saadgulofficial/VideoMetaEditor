@@ -1,4 +1,4 @@
-import { View, Text, FlatList, StatusBar, PermissionsAndroid, Image } from 'react-native'
+import { View, Text, FlatList, StatusBar, PermissionsAndroid, Image, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState, useReducer } from 'react'
 import Style from './Style'
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -6,42 +6,26 @@ import { hp, Typography, wp } from '../../global'
 import { Colors } from '../../res'
 import CameraRoll from "@react-native-community/cameraroll";
 import { CommonServices } from '../../services'
+import moment from 'moment'
+import { Loader } from '../../components'
 
 const Home = () => {
-    const [videos, setVideos] = useState([
-        {
-            group_name: "DCIM",
-            image: {
-                fileSize: 543879,
-                filename: "sample-mp4-file-small.mp4",
-                height: 240,
-                playableDuration: 30,
-                uri: "file:///storage/emulated/0/DCIM/sample-mp4-file-small.mp4",
-                width: 320,
-                location: null,
-                modified: 1650208929,
-                timestamp: 1650208929,
-                type: "video/mp4",
-            }
-        }
-    ])
-    const [, forceUpdate] = useReducer(x => x + 1, 0);
+    const [videos, setVideos] = useState([])
     const [loader, setLoader] = useState(false)
-    const [hasPermission, setHasPermission] = useState(false)
 
 
     const getPhotos = () => {
         const fetchParams: any = {
-            first: 1,
+            first: 50,
             assetType: 'Videos',
             include: ['filename', 'fileSize', 'imageSize', 'playableDuration']
         };
-        CameraRoll.getPhotos(fetchParams).then((data) => {
-            data.edges.forEach((element: any) => {
-
-            })
+        CameraRoll.getPhotos(fetchParams).then((data: any) => {
+            setVideos(data.edges)
+            setLoader(false)
         }).catch((e) => {
             setVideos(videos)
+            setLoader(false)
             console.log('error while fetching videos from gallery =>', e);
         });
     }
@@ -62,7 +46,6 @@ const Home = () => {
         hasAndroidPermission().then((permission) => {
             if(permission) {
                 setLoader(true)
-                setHasPermission(true)
                 getPhotos()
             }
             else {
@@ -72,21 +55,36 @@ const Home = () => {
     }
 
     useEffect(() => {
-        // const cleanup = givePermission()
-        // return () => cleanup
+        const cleanup = givePermission()
+        return () => cleanup
     }, [])
 
     const renderVideos = ({ item }) => {
+        const { timestamp, image } = item.node
+        const { uri, filename, playableDuration } = image
+
         return (
             <View style={Style.videoItemContainer}>
-                <View style={{ ...Style.shadow, ...Style.videoThumbnailCon }}>
+                <View style={Style.videoThumbnailCon}>
                     <Image
-                        source={{ uri: item.image.uri }}
+                        source={{ uri }}
                         resizeMode='cover'
                         style={Style.videoThumbnail}
                     />
+                    <View style={Style.durationContainer}>
+                        <Text style={{ ...Typography.reg, ...Style.durationTxt }}>
+                            {moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm")} Min
+                        </Text>
+                    </View>
                 </View>
-
+                <Text style={{ ...Typography.desTwo, ...Style.videoName }}
+                    numberOfLines={1}
+                >
+                    {filename.charAt(0).toUpperCase() + filename.slice(1)}
+                </Text>
+                <Text style={{ ...Typography.reg, ...Style.videoDate }}>
+                    {moment.unix(timestamp).format('MMM Do YYYY, h:mm A')}
+                </Text>
             </View>
         )
     }
@@ -100,11 +98,16 @@ const Home = () => {
                 </Text>
                 <AntDesign name='search1' size={wp(7)} color={Colors.black} />
             </View>
-            <FlatList
-                data={videos}
-                renderItem={renderVideos}
-                contentContainerStyle={Style.videoListContainer}
-            />
+            {
+                loader ?
+                    <Loader />
+                    :
+                    <FlatList
+                        data={videos}
+                        renderItem={renderVideos}
+                        contentContainerStyle={Style.videoListContainer}
+                    />
+            }
         </View>
     )
 }

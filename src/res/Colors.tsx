@@ -13,6 +13,8 @@ const Colors: any = {
     grey3: colors.grey3,
     grey4: colors.grey4,
     grey5: colors.grey5,
+
+    blackRGBA20: 'rgba(0,0,0,0.5)'
 }
 
 export default Colors

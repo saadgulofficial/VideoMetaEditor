@@ -1,6 +1,6 @@
 import { Dimensions, StyleSheet } from 'react-native'
 import { wp, hp } from '../../global'
-import { Colors } from '../../res'
+import { Colors, Fonts } from '../../res'
 
 const { width } = Dimensions.get('window')
 export default StyleSheet.create({
@@ -22,11 +22,10 @@ export default StyleSheet.create({
         paddingTop: hp(2)
     },
     videoItemContainer: {
-        borderWidth: 0
+        marginBottom: hp(5)
     },
     videoThumbnailCon: {
         paddingBottom: hp(1),
-        marginBottom: hp(1),
         borderRadius: 20
     },
     videoThumbnail: {
@@ -34,15 +33,27 @@ export default StyleSheet.create({
         height: hp(30),
         borderRadius: 20,
     },
-    shadow: {
-        shadowColor: Colors.grey0,
-        shadowOffset: {
-            width: 10,
-            height: 10,
-        },
-        shadowOpacity: 0.18,
-        shadowRadius: 1.00,
-
-        elevation: 5,
+    videoName: {
+        marginHorizontal: wp(1),
+        width: wp(90),
+    },
+    videoDate: {
+        marginHorizontal: wp(1),
+        color: Colors.grey0,
+        fontFamily: Fonts.APPFONT_R
+    },
+    durationContainer: {
+        borderWidth: 0,
+        position: 'absolute',
+        paddingHorizontal: wp(2),
+        paddingVertical: hp(0.5),
+        bottom: hp(1.8),
+        right: wp(2),
+        borderRadius: 20,
+        backgroundColor: Colors.blackRGBA20
+    },
+    durationTxt: {
+        color: Colors.white,
+        fontFamily: Fonts.APPFONT_M
     }
 })
