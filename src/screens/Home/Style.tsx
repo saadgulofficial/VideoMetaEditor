@@ -19,7 +19,6 @@ export default StyleSheet.create({
     },
     videoListContainer: {
         paddingHorizontal: wp(3),
-        paddingTop: hp(2)
     },
     videoItemContainer: {
         marginBottom: hp(5),
@@ -55,5 +54,26 @@ export default StyleSheet.create({
     durationTxt: {
         color: Colors.white,
         fontFamily: Fonts.APPFONT_M
+    },
+    permissionBtnCon: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingTop: hp(15)
+    },
+    givePermissionBtn: {
+        borderWidth: 1,
+        borderColor: Colors.grey4,
+        paddingHorizontal: wp(8),
+        paddingVertical: hp(1),
+        borderRadius: 8
+    },
+    givePermissionDes: {
+        marginTop: hp(2),
+        fontFamily: Fonts.APPFONT_R,
+        color: Colors.grey2,
+        textAlign: 'center',
+        alignSelf: 'center',
+        width: wp(60)
     }
 })

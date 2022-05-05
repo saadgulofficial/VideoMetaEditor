@@ -12,7 +12,7 @@ import { Loader } from '../../components'
 const Home = ({ navigation }) => {
     const [videos, setVideos] = useState([])
     const [loader, setLoader] = useState(false)
-
+    const [checkPermission, setCheckPermission] = useState<any>('')
 
     const getPhotos = () => {
         const fetchParams: any = {
@@ -43,12 +43,14 @@ const Home = ({ navigation }) => {
     }
 
     const givePermission = () => {
-        hasAndroidPermission().then((permission) => {
+        hasAndroidPermission().then((permission: any) => {
             if(permission) {
+                setCheckPermission(permission)
                 setLoader(true)
                 getPhotos()
             }
             else {
+                setCheckPermission(false)
                 setLoader(false)
             }
         }).catch(() => setLoader(false))
@@ -102,6 +104,22 @@ const Home = ({ navigation }) => {
                 </Text>
                 <AntDesign name='search1' size={wp(7)} color={Colors.black} />
             </View>
+            {
+                checkPermission === false &&
+                <View style={Style.permissionBtnCon}>
+                    <TouchableOpacity style={Style.givePermissionBtn}
+                        activeOpacity={0.6}
+                        onPress={givePermission}
+                    >
+                        <Text style={{ ...Typography.des }}>
+                            Give Permission
+                        </Text>
+                    </TouchableOpacity>
+                    <Text style={{ ...Typography.des, ...Style.givePermissionDes }}>
+                        Give permission to access videos from your device
+                    </Text>
+                </View>
+            }
             {
                 loader ?
                     <Loader />
