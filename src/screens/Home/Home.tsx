@@ -1,14 +1,30 @@
-import { View, Text, FlatList, StatusBar, PermissionsAndroid } from 'react-native'
+import { View, Text, FlatList, StatusBar, PermissionsAndroid, Image } from 'react-native'
 import React, { useEffect, useState, useReducer } from 'react'
 import Style from './Style'
 import AntDesign from 'react-native-vector-icons/AntDesign'
-import { Typography, wp } from '../../global'
+import { hp, Typography, wp } from '../../global'
 import { Colors } from '../../res'
 import CameraRoll from "@react-native-community/cameraroll";
 import { CommonServices } from '../../services'
 
 const Home = () => {
-    const [allVideos, setAllVideos] = useState([])
+    const [videos, setVideos] = useState([
+        {
+            group_name: "DCIM",
+            image: {
+                fileSize: 543879,
+                filename: "sample-mp4-file-small.mp4",
+                height: 240,
+                playableDuration: 30,
+                uri: "file:///storage/emulated/0/DCIM/sample-mp4-file-small.mp4",
+                width: 320,
+                location: null,
+                modified: 1650208929,
+                timestamp: 1650208929,
+                type: "video/mp4",
+            }
+        }
+    ])
     const [, forceUpdate] = useReducer(x => x + 1, 0);
     const [loader, setLoader] = useState(false)
     const [hasPermission, setHasPermission] = useState(false)
@@ -16,33 +32,16 @@ const Home = () => {
 
     const getPhotos = () => {
         const fetchParams: any = {
-            first: 50,
+            first: 1,
             assetType: 'Videos',
             include: ['filename', 'fileSize', 'imageSize', 'playableDuration']
         };
         CameraRoll.getPhotos(fetchParams).then((data) => {
-            const videos = data.edges
-            console.log(videos)
-            // if(videos.length !== 0) {
-            //     CommonServices.asyncLoop(
-            //         videos.length, (loop) => {
-            //             var index = loop.iteration();
-            //             var element = videos[index]
-            //             allVideos.push(element.node)
-            //             forceUpdate()
-            //             setLoader(false)
-            //             loop.next()
-            //         }, () => {
-            //             setAllVideos(allVideos)
-            //             forceUpdate()
-            //         })
-            // }
-            // else {
-            //     setLoader(false)
-            //     setAllVideos(allVideos)
-            // }
+            data.edges.forEach((element: any) => {
+
+            })
         }).catch((e) => {
-            setAllVideos(allVideos)
+            setVideos(videos)
             console.log('error while fetching videos from gallery =>', e);
         });
     }
@@ -73,9 +72,24 @@ const Home = () => {
     }
 
     useEffect(() => {
-        const cleanup = givePermission()
-        return () => cleanup
+        // const cleanup = givePermission()
+        // return () => cleanup
     }, [])
+
+    const renderVideos = ({ item }) => {
+        return (
+            <View style={Style.videoItemContainer}>
+                <View style={{ ...Style.shadow, ...Style.videoThumbnailCon }}>
+                    <Image
+                        source={{ uri: item.image.uri }}
+                        resizeMode='cover'
+                        style={Style.videoThumbnail}
+                    />
+                </View>
+
+            </View>
+        )
+    }
 
     return (
         <View style={Style.container}>
@@ -86,6 +100,11 @@ const Home = () => {
                 </Text>
                 <AntDesign name='search1' size={wp(7)} color={Colors.black} />
             </View>
+            <FlatList
+                data={videos}
+                renderItem={renderVideos}
+                contentContainerStyle={Style.videoListContainer}
+            />
         </View>
     )
 }
