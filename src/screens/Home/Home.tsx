@@ -5,7 +5,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import { hp, Typography, wp } from '../../global'
 import { Colors } from '../../res'
 import CameraRoll from "@react-native-community/cameraroll";
-import { CommonServices } from '../../services'
+import { CommonServices, GSQLite } from '../../services'
 import moment from 'moment'
 import { Loader } from '../../components'
 
@@ -14,6 +14,19 @@ const Home = ({ navigation }) => {
     const [loader, setLoader] = useState(false)
     const [checkPermission, setCheckPermission] = useState<any>('')
 
+    const getData = async () => {
+        await GSQLite.openDataBase().then(() => {
+            var tableName = 'MetaData'
+            var getQuery = {
+                query: "SELECT * FROM MetaData",
+                params: []
+            }
+            GSQLite.getData(tableName, getQuery).then(videosList => {
+                console.log('videosList =>', videosList)
+            })
+                .catch(() => { })
+        })
+    }
     const getPhotos = () => {
         const fetchParams: any = {
             first: 50,
@@ -21,6 +34,7 @@ const Home = ({ navigation }) => {
             include: ['filename', 'fileSize', 'imageSize', 'playableDuration']
         };
         CameraRoll.getPhotos(fetchParams).then((data: any) => {
+            getData()
             setVideos(data.edges)
             setLoader(false)
         }).catch((e) => {

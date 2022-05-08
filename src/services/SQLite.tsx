@@ -8,7 +8,7 @@ class SQLiteClass {
         return new Promise((resolve, reject) => {
             global.db = SQLite.openDatabase(
                 {
-                    name: 'Emotions.db',
+                    name: 'VideoMetaData.db',
                     createFromLocation: 1
                 },
                 async () => { resolve('') },
