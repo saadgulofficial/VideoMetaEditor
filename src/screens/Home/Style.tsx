@@ -75,5 +75,40 @@ export default StyleSheet.create({
         textAlign: 'center',
         alignSelf: 'center',
         width: wp(60)
+    },
+    searchBarContainer: {
+        marginTop: hp(2),
+        borderWidth: 0.8,
+        borderColor: Colors.color2,
+        width: wp(93),
+        alignSelf: 'center',
+        borderRadius: 20,
+        paddingHorizontal: wp(2),
+        backgroundColor: Colors.color1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    searchInput: {
+        paddingVertical: hp(1),
+        fontFamily: Fonts.APPFONT_R,
+        color: Colors.black,
+        width: wp(73),
+    },
+    cancelTxt: {
+        color: Colors.color3,
+        fontFamily: Fonts.APPFONT_R,
+        marginRight: wp(1)
+    },
+    emptyListContainer: {
+        height: hp(50),
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    emptyListText: {
+        color: Colors.grey3,
+        alignSelf: 'center',
+        textAlign: 'center',
+        width: wp(70)
     }
 })

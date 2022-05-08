@@ -17,7 +17,8 @@ const Colors: any = {
     blackRGBA50: 'rgba(0,0,0,0.5)',
 
     color1: '#F2F2F2',
-    color2: '#D0CFCF'
+    color2: '#D0CFCF',
+    color3: '#007AFF',
 
 }
 

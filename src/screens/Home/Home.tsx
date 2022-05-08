@@ -1,4 +1,4 @@
-import { View, Text, FlatList, StatusBar, PermissionsAndroid, Image, TouchableOpacity } from 'react-native'
+import { View, Text, FlatList, StatusBar, PermissionsAndroid, Image, TouchableOpacity, TextInput } from 'react-native'
 import React, { useEffect, useState, useReducer } from 'react'
 import Style from './Style'
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -10,12 +10,19 @@ import { CommonServices, GSQLite } from '../../services'
 import moment from 'moment'
 import { Loader, LoaderModal } from '../../components'
 import _ from 'lodash'
+import { Animation } from '../../animations'
+
 
 const Home = ({ navigation }) => {
+    const [search, setSearch] = useState('')
     const [videos, setVideos] = useState([])
     const [loader, setLoader] = useState(false)
     const [checkPermission, setCheckPermission] = useState<any>('')
     const [, forceUpdate] = useReducer(x => x + 1, 0);
+    const [showSearchBar, setShowSearchBar] = useState(false)
+
+    const onPressSearchIcon = () => setShowSearchBar(true)
+    const onCancelPress = () => setShowSearchBar(false)
 
     const getData = async (data) => {
         await GSQLite.openDataBase().then(() => {
@@ -149,15 +156,53 @@ const Home = ({ navigation }) => {
         )
     }
 
+    const renderEmptyList = () => {
+        return (
+            <View style={Style.emptyListContainer}>
+                <Text style={{ ...Typography.des, ...Style.emptyListText }}>
+                    No videos found please add videos to your device first
+                </Text>
+            </View>
+        )
+    }
     return (
         <View style={Style.container}>
             <StatusBar backgroundColor={Colors.white} barStyle='dark-content' />
-            <View style={Style.headerContainer}>
-                <Text style={{ ...Typography.headingTwo, ...Style.heading }}>
-                    VIDEO META EDITOR
-                </Text>
-                <AntDesign name='search1' size={wp(7)} color={Colors.black} />
-            </View>
+            {
+                !showSearchBar ?
+                    <View style={{ ...Style.headerContainer, flexDirection: videos.length !== 0 ? 'row' : 'column' }}>
+                        <Text style={{ ...Typography.headingTwo, ...Style.heading, alignSelf: videos.length === 0 ? 'center' : null }}>
+                            VIDEO META EDITOR
+                        </Text>
+                        {
+                            videos.length !== 0 &&
+                            <AntDesign name='search1' size={wp(7)} color={Colors.black} onPress={onPressSearchIcon} />
+                        }
+                    </View>
+                    :
+                    <Animation
+                        animation="slideInRight"
+                        duration={500}
+                    >
+                        <View style={Style.searchBarContainer}>
+                            <TextInput
+                                value={search}
+                                placeholder='Search By name'
+                                placeholderTextColor={Colors.grey3}
+                                style={{ ...Typography.des, ...Style.searchInput }}
+                            />
+                            <TouchableOpacity
+                                activeOpacity={0.6}
+                                onPress={onCancelPress}
+                            >
+                                <Text style={{ ...Typography.des, ...Style.cancelTxt }}>Cancel</Text>
+                            </TouchableOpacity>
+
+                        </View>
+                    </Animation>
+
+            }
+
             {
                 checkPermission === false &&
                 <View style={Style.permissionBtnCon}>
@@ -184,6 +229,7 @@ const Home = ({ navigation }) => {
                         data={videos}
                         renderItem={renderVideos}
                         contentContainerStyle={Style.videoListContainer}
+                        ListEmptyComponent={renderEmptyList}
                     />
             }
         </View>
