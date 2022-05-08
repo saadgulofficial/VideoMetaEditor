@@ -1,7 +1,7 @@
 import { View, Text, TextInput, ScrollView, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Style from './Style'
-import { GButton, Header, VideoPlayer } from '../../components'
+import { GButton, MessageAlert, Header, VideoPlayer } from '../../components'
 import { hp, Typography } from '../../global'
 import moment from 'moment'
 
@@ -39,7 +39,7 @@ const VideoDetail = ({ route, navigation }) => {
     }, [])
 
     const onSavePress = () => {
-        Alert.alert('pressed')
+        MessageAlert('Test', 'info')
     }
 
     return (
