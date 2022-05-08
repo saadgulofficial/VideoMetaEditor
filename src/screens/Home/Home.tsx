@@ -9,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { CommonServices, GSQLite } from '../../services'
 import moment from 'moment'
 import { Loader, LoaderModal } from '../../components'
+import _ from 'lodash'
 
 const Home = ({ navigation }) => {
     const [videos, setVideos] = useState([])
@@ -25,34 +26,32 @@ const Home = ({ navigation }) => {
             }
             GSQLite.getData(tableName, getQuery).then((videosListFromDb: any) => {
                 if(videosListFromDb.length === 0) {
-                    setVideos(data.edges)
+                    setVideos(data)
                     setLoader(false)
                 }
                 else {
+                    var videosArray = []
                     CommonServices.asyncLoop(
-                        data.edges.length, (loop) => {
+                        data.length, (loop) => {
                             var index = loop.iteration();
-                            var element = data.edges[index].node
+                            var element = data[index].node
                             videosListFromDb.forEach(dbElement => {
                                 if(dbElement.id === element.image.filename.trim()) {
-                                    var { image, timestamp } = element
-                                    var { filename } = image
                                     var { date, name } = dbElement
                                     if(data.length !== 0) {
-                                        timestamp = date
+                                        element.timestamp = date
                                     }
                                     if(name.length !== 0) {
-                                        filename = name
+                                        element.image.filename = name
                                     }
                                     element.dbData = dbElement
                                 }
                             });
-                            videos.push(element)
-                            forceUpdate()
-                            setLoader(false)
+                            element = { node: element }
+                            videosArray.push(element)
                             loop.next()
                         }, () => {
-                            // setVideos(videos)
+                            setVideos(videosArray)
                             forceUpdate()
                             setLoader(false)
                         })
@@ -63,12 +62,12 @@ const Home = ({ navigation }) => {
     }
     const getPhotos = () => {
         const fetchParams: any = {
-            first: 50,
+            first: 30,
             assetType: 'Videos',
             include: ['filename', 'fileSize', 'imageSize', 'playableDuration']
         };
         CameraRoll.getPhotos(fetchParams).then((data: any) => {
-            getData(data)
+            getData(data.edges)
         }).catch((e) => {
             setVideos(videos)
             setLoader(false)
@@ -102,35 +101,25 @@ const Home = ({ navigation }) => {
         }).catch(() => setLoader(false))
     }
 
-    // const useFocus = () => {
-    //     setLoader(true)
-    //     console.log('videos =>', videos)
-    //     if(videos.length === 0) {
-    //         givePermission()
-    //     }
-    //     else {
-    //         // console.log('videos =>', videos)
-    //     }
-    // }
-
     useFocusEffect(
         React.useCallback(() => {
-            const unsubscribe = givePermission()
+            var unsubscribe = null
+            if(videos.length === 0) {
+                unsubscribe = givePermission()
+            }
+            else {
+                setLoader(true)
+                forceUpdate()
+                unsubscribe = getData(videos)
+            }
             return () => unsubscribe
         }, [])
     );
-
-
-    // useEffect(() => {
-    //     const cleanup = givePermission()
-    //     return () => cleanup
-    // }, [])
 
     const onVideoPress = (item) => navigation.navigate('VideoDetail', { videoDetail: item })
     const renderVideos = ({ item }) => {
         const { timestamp, image } = item.node
         const { uri, filename, playableDuration } = image
-
         return (
             <TouchableOpacity style={Style.videoItemContainer}
                 activeOpacity={0.8}
@@ -154,7 +143,7 @@ const Home = ({ navigation }) => {
                     {filename.charAt(0).toUpperCase() + filename.slice(1)}
                 </Text>
                 <Text style={{ ...Typography.reg, ...Style.videoDate }}>
-                    {moment.unix(timestamp).format('MMM Do YYYY, h:mm A')}
+                    {moment.unix(timestamp).format('MMMM-DD-YYYY')}
                 </Text>
             </TouchableOpacity>
         )
