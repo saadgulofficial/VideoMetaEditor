@@ -245,7 +245,7 @@ const Home = ({ navigation }) => {
                     :
                     <Animation
                         animation='fadeInDown'
-                        style={{ paddingBottom: hp(10) }}
+                        style={{ paddingBottom: hp(5) }}
                     >
                         <FlatList
                             data={videos}
