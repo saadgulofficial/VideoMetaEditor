@@ -16,6 +16,7 @@ import { Animation } from '../../animations'
 const Home = ({ navigation }) => {
     const [search, setSearch] = useState('')
     const [videos, setVideos] = useState([])
+    const [videosTemp, setVideosTemp] = useState([])
     const [loader, setLoader] = useState(false)
     const [checkPermission, setCheckPermission] = useState<any>('')
     const [, forceUpdate] = useReducer(x => x + 1, 0);
@@ -34,6 +35,7 @@ const Home = ({ navigation }) => {
             GSQLite.getData(tableName, getQuery).then((videosListFromDb: any) => {
                 if(videosListFromDb.length === 0) {
                     setVideos(data)
+                    setVideosTemp(data)
                     setLoader(false)
                 }
                 else {
@@ -59,6 +61,7 @@ const Home = ({ navigation }) => {
                             loop.next()
                         }, () => {
                             setVideos(videosArray)
+                            setVideosTemp(videosArray)
                             forceUpdate()
                             setLoader(false)
                         })
@@ -77,6 +80,7 @@ const Home = ({ navigation }) => {
             getData(data.edges)
         }).catch((e) => {
             setVideos(videos)
+            setVideosTemp(videos)
             setLoader(false)
             console.log('error while fetching videos from gallery =>', e);
         });
@@ -108,6 +112,20 @@ const Home = ({ navigation }) => {
         }).catch(() => setLoader(false))
     }
 
+    const onChangeSearch = (searchTxt) => {
+        setSearch(searchTxt)
+        if(searchTxt.length === 0) {
+            setVideos(videosTemp)
+        }
+        const videosTemp2 = videosTemp.filter(function (element: any) {
+            const text = searchTxt.toUpperCase()
+            const name = element.node.image.filename.toUpperCase()
+            return name.includes(text)
+        }).map(function (item: any) {
+            return item
+        })
+        setVideos(videosTemp2)
+    }
     useFocusEffect(
         React.useCallback(() => {
             var unsubscribe = null
@@ -182,13 +200,14 @@ const Home = ({ navigation }) => {
                     :
                     <Animation
                         animation="slideInRight"
-                        duration={500}
+                        style={{ paddingBottom: hp(2) }}
                     >
                         <View style={Style.searchBarContainer}>
                             <TextInput
                                 value={search}
                                 placeholder='Search By name'
                                 placeholderTextColor={Colors.grey3}
+                                onChangeText={onChangeSearch}
                                 style={{ ...Typography.des, ...Style.searchInput }}
                             />
                             <TouchableOpacity
@@ -200,7 +219,6 @@ const Home = ({ navigation }) => {
 
                         </View>
                     </Animation>
-
             }
 
             {
@@ -225,12 +243,19 @@ const Home = ({ navigation }) => {
                         visible={loader}
                     />
                     :
-                    <FlatList
-                        data={videos}
-                        renderItem={renderVideos}
-                        contentContainerStyle={Style.videoListContainer}
-                        ListEmptyComponent={renderEmptyList}
-                    />
+                    <Animation
+                        animation='fadeInDown'
+                        style={{ paddingBottom: hp(10) }}
+                    >
+                        <FlatList
+                            data={videos}
+                            renderItem={renderVideos}
+                            contentContainerStyle={Style.videoListContainer}
+                            ListEmptyComponent={renderEmptyList}
+                        />
+                    </Animation>
+
+
             }
         </View>
     )

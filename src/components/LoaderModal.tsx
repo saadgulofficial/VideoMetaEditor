@@ -54,6 +54,7 @@ const Style = StyleSheet.create({
     subContainer: {
         alignItems: "center",
         justifyContent: "center",
+        flex: 1
     },
     loaderContentContainer: {
         width: wp(85),

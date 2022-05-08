@@ -23,9 +23,7 @@ const Animation = (props) => {
 export default Animation
 
 const Style = StyleSheet.create({
-    container: {
-        flex: 1
-    }
+    container: {}
 })
 
 
