@@ -104,7 +104,7 @@ class SQLiteClass {
     insertIntoTable = (insertQuery: { query, values }) => {
         return new Promise((resolve, reject) => {
             this.executeQuery(insertQuery.query, insertQuery.values)
-                .then(() => resolve(''))
+                .then((results) => resolve(results))
                 .catch((err) => {
                     console.log('error while inserting  data ->', err)
                     this.commonError()

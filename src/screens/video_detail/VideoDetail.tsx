@@ -1,9 +1,11 @@
 import { View, Text, TextInput, ScrollView, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Style from './Style'
-import { GButton, MessageAlert, Header, VideoPlayer } from '../../components'
+import { GButton, MessageAlert, Header, VideoPlayer, LoaderModal, Loader } from '../../components'
 import { hp, Typography } from '../../global'
 import moment from 'moment'
+import { GSQLite } from '../../services'
+
 
 const VideoDetail = ({ route, navigation }) => {
     const { videoDetail } = route.params
@@ -18,6 +20,8 @@ const VideoDetail = ({ route, navigation }) => {
     const [location, setLocation] = useState('')
     const [date, setDate] = useState('')
     const [description, setDescription] = useState('')
+    const [loader, setLoader] = useState(true)
+    const [loaderMessage, setLoaderMessage] = useState('Loading please wait')
 
     const onChangeStartTime = (text) => setStartTime(text)
     const onChangeEndTime = (text) => setEndTime(text)
@@ -32,6 +36,7 @@ const VideoDetail = ({ route, navigation }) => {
         setEndTime(moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm"))
         setVideoName(filename.charAt(0).toUpperCase() + filename.slice(1))
         setDate(moment.unix(timestamp).format('MMM-D-YYYY'))
+        setLoader(false)
     }
     useEffect(() => {
         const clean = setData()
@@ -39,7 +44,40 @@ const VideoDetail = ({ route, navigation }) => {
     }, [])
 
     const onSavePress = () => {
-        MessageAlert('Test', 'info')
+        setLoader(true)
+        setLoaderMessage("Saving please wait...")
+        var id = filename.trim()
+        if(videoDetail.id) {
+            id = videoDetail.id
+        }
+        var tableName = 'MetaData'
+        var getQuery = {
+            query: "SELECT * FROM MetaData WHERE id = ?",
+            params: [id]
+        }
+        GSQLite.getData(tableName, getQuery).then((data: any) => {
+            if(data.length !== 0) {
+                var updateQuery = {
+                    query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
+                               people = ?,events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
+                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
+                }
+                GSQLite.update(updateQuery).then(() => {
+                    MessageAlert('Saved in Database', 'success')
+                    setLoader(false)
+                }).catch(() => setLoader(false))
+            }
+            else {
+                var insertQuery = {
+                    query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id) VALUES (?,?,?,?,?,?,?,?,?)',
+                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
+                }
+                GSQLite.insertIntoTable(insertQuery).then(() => {
+                    MessageAlert('Saved in Database', 'success')
+                    setLoader(false)
+                }).catch(() => setLoader(false))
+            }
+        }).catch(() => setLoader(false))
     }
 
     return (
@@ -47,6 +85,10 @@ const VideoDetail = ({ route, navigation }) => {
             <Header
                 back
                 navigation={navigation}
+            />
+            <LoaderModal
+                visible={loader}
+                message={loaderMessage}
             />
             <ScrollView
                 showsVerticalScrollIndicator={false}
