@@ -1,8 +1,8 @@
-import { View, Text, TextInput, ScrollView } from 'react-native'
+import { View, Text, TextInput, ScrollView, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Style from './Style'
-import { Header, VideoPlayer } from '../../components'
-import { Typography } from '../../global'
+import { GButton, Header, VideoPlayer } from '../../components'
+import { hp, Typography } from '../../global'
 import moment from 'moment'
 
 const VideoDetail = ({ route, navigation }) => {
@@ -38,17 +38,25 @@ const VideoDetail = ({ route, navigation }) => {
         return () => clean
     }, [])
 
+    const onSavePress = () => {
+        Alert.alert('pressed')
+    }
+
     return (
         <View style={Style.container}>
             <Header
                 back
                 navigation={navigation}
             />
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: hp(5) }}
+            >
                 <VideoPlayer
                     uri={uri}
                 />
                 <View style={Style.videoMetaDataCon}>
+                    <Text style={{ ...Typography.heading, ...Style.heading }}>Video Meta Deta</Text>
                     <View style={Style.fieldContainer}>
                         <Text style={{ ...Typography.des, ...Style.fieldLabel }}
                             numberOfLines={1}
@@ -152,9 +160,12 @@ const VideoDetail = ({ route, navigation }) => {
                             onChangeText={onChangeDescription}
                         />
                     </View>
-
-
                 </View>
+
+                <GButton
+                    text="Save"
+                    onPress={onSavePress}
+                />
             </ScrollView>
         </View>
     )

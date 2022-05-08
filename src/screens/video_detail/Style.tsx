@@ -7,6 +7,13 @@ export default StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.white,
     },
+    heading: {
+        alignSelf: 'center',
+        textAlign: 'center',
+        color: Colors.theme,
+        marginBottom: hp(2),
+        marginTop: hp(1)
+    },
     videoMetaDataCon: {
         borderWidth: 0.7,
         borderColor: Colors.color2,

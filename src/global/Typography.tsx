@@ -5,7 +5,7 @@ export default StyleSheet.create({
     heading: {
         fontSize: wp(5),
         color: Colors.black,
-        fontFamily: Fonts.APPFONT_B
+        fontFamily: Fonts.APPFONT_M
     },
     headingTwo: {
         fontSize: wp(5.5),
