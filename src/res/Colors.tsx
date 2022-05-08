@@ -14,7 +14,11 @@ const Colors: any = {
     grey4: colors.grey4,
     grey5: colors.grey5,
 
-    blackRGBA20: 'rgba(0,0,0,0.5)'
+    blackRGBA50: 'rgba(0,0,0,0.5)',
+
+    color1: '#F2F2F2',
+    color2: '#D0CFCF'
+
 }
 
 export default Colors

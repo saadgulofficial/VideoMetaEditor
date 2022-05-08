@@ -49,7 +49,7 @@ export default StyleSheet.create({
         bottom: hp(1.8),
         right: wp(2),
         borderRadius: 20,
-        backgroundColor: Colors.blackRGBA20
+        backgroundColor: Colors.blackRGBA50
     },
     durationTxt: {
         color: Colors.white,
