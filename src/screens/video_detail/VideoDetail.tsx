@@ -46,9 +46,18 @@ const VideoDetail = ({ route, navigation }) => {
     const onPressDate = () => setShowDatePicker(true)
 
     const setData = () => {
+        const { videoDetail } = route.params
+        const { dbData } = videoDetail
         setEndTime(moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm"))
         setVideoName(filename.charAt(0).toUpperCase() + filename.slice(1))
         setDate(timestamp)
+        if(dbData) {
+            const { people, events, location, description } = dbData
+            setPeople(people)
+            setEvents(events)
+            setLocation(location)
+            setDescription(description)
+        }
         setLoader(false)
     }
     useEffect(() => {
@@ -215,16 +224,17 @@ const VideoDetail = ({ route, navigation }) => {
                         />
                     </View>
 
-                    <View style={Style.fieldContainer}>
-                        <Text style={{ ...Typography.des, ...Style.fieldLabel }}
+                    <View style={{ ...Style.fieldContainer, alignItems: 'flex-start' }}>
+                        <Text style={{ ...Typography.des, ...Style.fieldLabel, marginTop: hp(0.5) }}
                             numberOfLines={1}
                         >
                             Description
                         </Text>
                         <TextInput
                             value={description}
-                            style={{ ...Typography.des, ...Style.fieldInput }}
+                            style={{ ...Typography.des, ...Style.fieldInput, textAlignVertical: 'top', height: hp(20) }}
                             onChangeText={onChangeDescription}
+                            multiline
                         />
                     </View>
                 </View>

@@ -23,7 +23,11 @@ const Home = ({ navigation }) => {
     const [showSearchBar, setShowSearchBar] = useState(false)
 
     const onPressSearchIcon = () => setShowSearchBar(true)
-    const onCancelPress = () => setShowSearchBar(false)
+    const onCancelPress = () => {
+        setShowSearchBar(false)
+        setSearch('')
+        setVideos(videosTemp)
+    }
 
     const getData = async (data) => {
         await GSQLite.openDataBase().then(() => {
@@ -209,6 +213,7 @@ const Home = ({ navigation }) => {
                                 placeholderTextColor={Colors.grey3}
                                 onChangeText={onChangeSearch}
                                 style={{ ...Typography.des, ...Style.searchInput }}
+                                autoFocus
                             />
                             <TouchableOpacity
                                 activeOpacity={0.6}
