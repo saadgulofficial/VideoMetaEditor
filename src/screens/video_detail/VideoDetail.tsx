@@ -1,10 +1,11 @@
-import { View, Text, TextInput, ScrollView, Alert } from 'react-native'
+import { View, Text, TextInput, ScrollView, Alert, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Style from './Style'
 import { GButton, MessageAlert, Header, VideoPlayer, LoaderModal, Loader } from '../../components'
 import { hp, Typography } from '../../global'
 import moment from 'moment'
 import { GSQLite } from '../../services'
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 const VideoDetail = ({ route, navigation }) => {
@@ -22,6 +23,7 @@ const VideoDetail = ({ route, navigation }) => {
     const [description, setDescription] = useState('')
     const [loader, setLoader] = useState(true)
     const [loaderMessage, setLoaderMessage] = useState('Loading please wait')
+    const [showDatePicker, setShowDatePicker] = useState(false)
 
     const onChangeStartTime = (text) => setStartTime(text)
     const onChangeEndTime = (text) => setEndTime(text)
@@ -31,11 +33,12 @@ const VideoDetail = ({ route, navigation }) => {
     const onChangeLocation = (text) => setLocation(text)
     const onChangeDate = (text) => setDate(text)
     const onChangeDescription = (text) => setDescription(text)
+    const onPressDate = () => setShowDatePicker(true)
 
     const setData = () => {
         setEndTime(moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm"))
         setVideoName(filename.charAt(0).toUpperCase() + filename.slice(1))
-        setDate(moment.unix(timestamp).format('MMM-D-YYYY'))
+        setDate(moment.unix(timestamp).format('DD-MM-YYYY'))
         setLoader(false)
     }
     useEffect(() => {
@@ -46,6 +49,12 @@ const VideoDetail = ({ route, navigation }) => {
     const onSavePress = () => {
         setLoader(true)
         setLoaderMessage("Saving please wait...")
+
+        var myDate: any = date
+        myDate = myDate.split("-");
+        var newDate = new Date(myDate[2], myDate[1] - 1, myDate[0]);
+        var newDateTimeStamp = newDate.getTime()
+
         var id = filename.trim()
         if(videoDetail.id) {
             id = videoDetail.id
@@ -70,7 +79,7 @@ const VideoDetail = ({ route, navigation }) => {
             else {
                 var insertQuery = {
                     query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id) VALUES (?,?,?,?,?,?,?,?,?)',
-                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
+                    values: [startTime, endTime, videoName, people, events, location, newDateTimeStamp, description, id]
                 }
                 GSQLite.insertIntoTable(insertQuery).then(() => {
                     MessageAlert('Saved in Database', 'success')
@@ -183,11 +192,23 @@ const VideoDetail = ({ route, navigation }) => {
                         >
                             Date
                         </Text>
-                        <TextInput
-                            value={date}
-                            style={{ ...Typography.des, ...Style.fieldInput }}
-                            onChangeText={onChangeDate}
-                        />
+                        <TouchableOpacity style={Style.dateBtn}
+                            activeOpacity={0.5}
+                            onPress={onPressDate}
+                        >
+                            <Text style={{ ...Typography.des, ...Style.dateTxt }}>
+                                {date}
+                            </Text>
+                        </TouchableOpacity>
+                        {
+                            showDatePicker &&
+                            <DateTimePicker
+                                testID="dateTimePicker"
+                                value={new Date(1598051730000)}
+                                mode={'date'}
+                            // onChange={onChange}
+                            />
+                        }
                     </View>
 
                     <View style={Style.fieldContainer}>

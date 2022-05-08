@@ -42,5 +42,16 @@ export default StyleSheet.create({
     },
     fieldLabel: {
         width: wp(19),
+    },
+    dateBtn: {
+        width: wp(65),
+        backgroundColor: Colors.white,
+        borderRadius: 20,
+        paddingVertical: hp(1.5),
+        paddingHorizontal: wp(4),
+    },
+    dateTxt: {
+        color: Colors.grey0,
+        fontFamily: Fonts.APPFONT_R
     }
 })

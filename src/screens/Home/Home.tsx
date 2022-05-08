@@ -5,26 +5,60 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import { hp, Typography, wp } from '../../global'
 import { Colors } from '../../res'
 import CameraRoll from "@react-native-community/cameraroll";
+import { useFocusEffect } from '@react-navigation/native';
 import { CommonServices, GSQLite } from '../../services'
 import moment from 'moment'
-import { Loader } from '../../components'
+import { Loader, LoaderModal } from '../../components'
 
 const Home = ({ navigation }) => {
     const [videos, setVideos] = useState([])
     const [loader, setLoader] = useState(false)
     const [checkPermission, setCheckPermission] = useState<any>('')
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
-    const getData = async () => {
+    const getData = async (data) => {
         await GSQLite.openDataBase().then(() => {
             var tableName = 'MetaData'
             var getQuery = {
                 query: "SELECT * FROM MetaData",
                 params: []
             }
-            GSQLite.getData(tableName, getQuery).then(videosList => {
-                console.log('videosList =>', videosList)
+            GSQLite.getData(tableName, getQuery).then((videosListFromDb: any) => {
+                if(videosListFromDb.length === 0) {
+                    setVideos(data.edges)
+                    setLoader(false)
+                }
+                else {
+                    CommonServices.asyncLoop(
+                        data.edges.length, (loop) => {
+                            var index = loop.iteration();
+                            var element = data.edges[index].node
+                            videosListFromDb.forEach(dbElement => {
+                                if(dbElement.id === element.image.filename.trim()) {
+                                    var { image, timestamp } = element
+                                    var { filename } = image
+                                    var { date, name } = dbElement
+                                    if(data.length !== 0) {
+                                        timestamp = date
+                                    }
+                                    if(name.length !== 0) {
+                                        filename = name
+                                    }
+                                    element.dbData = dbElement
+                                }
+                            });
+                            videos.push(element)
+                            forceUpdate()
+                            setLoader(false)
+                            loop.next()
+                        }, () => {
+                            // setVideos(videos)
+                            forceUpdate()
+                            setLoader(false)
+                        })
+                }
             })
-                .catch(() => { })
+                .catch(() => { setLoader(false) })
         })
     }
     const getPhotos = () => {
@@ -34,9 +68,7 @@ const Home = ({ navigation }) => {
             include: ['filename', 'fileSize', 'imageSize', 'playableDuration']
         };
         CameraRoll.getPhotos(fetchParams).then((data: any) => {
-            getData()
-            setVideos(data.edges)
-            setLoader(false)
+            getData(data)
         }).catch((e) => {
             setVideos(videos)
             setLoader(false)
@@ -70,10 +102,29 @@ const Home = ({ navigation }) => {
         }).catch(() => setLoader(false))
     }
 
-    useEffect(() => {
-        const cleanup = givePermission()
-        return () => cleanup
-    }, [])
+    // const useFocus = () => {
+    //     setLoader(true)
+    //     console.log('videos =>', videos)
+    //     if(videos.length === 0) {
+    //         givePermission()
+    //     }
+    //     else {
+    //         // console.log('videos =>', videos)
+    //     }
+    // }
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const unsubscribe = givePermission()
+            return () => unsubscribe
+        }, [])
+    );
+
+
+    // useEffect(() => {
+    //     const cleanup = givePermission()
+    //     return () => cleanup
+    // }, [])
 
     const onVideoPress = (item) => navigation.navigate('VideoDetail', { videoDetail: item })
     const renderVideos = ({ item }) => {
@@ -136,7 +187,9 @@ const Home = ({ navigation }) => {
             }
             {
                 loader ?
-                    <Loader />
+                    <LoaderModal
+                        visible={loader}
+                    />
                     :
                     <FlatList
                         data={videos}
