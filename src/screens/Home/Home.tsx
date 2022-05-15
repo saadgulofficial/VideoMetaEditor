@@ -21,6 +21,7 @@ const Home = ({ navigation }) => {
     const [checkPermission, setCheckPermission] = useState<any>('')
     const [, forceUpdate] = useReducer(x => x + 1, 0);
     const [showSearchBar, setShowSearchBar] = useState(false)
+    const [searchLoader, setSearchLoader] = useState(false)
 
     const onPressSearchIcon = () => setShowSearchBar(true)
     const onCancelPress = () => {
@@ -118,8 +119,10 @@ const Home = ({ navigation }) => {
 
     const onChangeSearch = (searchTxt) => {
         setSearch(searchTxt)
+        setSearchLoader(true)
         if(searchTxt.length === 0) {
             setVideos(videosTemp)
+            setSearchLoader(false)
         }
         const videosTemp2 = videosTemp.filter(function (element: any) {
             const text = searchTxt.toUpperCase()
@@ -149,6 +152,7 @@ const Home = ({ navigation }) => {
             return item
         })
         setVideos(videosTemp2)
+        setSearchLoader(false)
     }
     useFocusEffect(
         React.useCallback(() => {
@@ -269,17 +273,20 @@ const Home = ({ navigation }) => {
                         visible={loader}
                     />
                     :
-                    <Animation
-                        animation='fadeInDown'
-                        style={{ paddingBottom: hp(5) }}
-                    >
-                        <FlatList
-                            data={videos}
-                            renderItem={renderVideos}
-                            contentContainerStyle={Style.videoListContainer}
-                            ListEmptyComponent={renderEmptyList}
-                        />
-                    </Animation>
+                    searchLoader ?
+                        <Loader />
+                        :
+                        <Animation
+                            animation='fadeInDown'
+                            style={{ paddingBottom: hp(5) }}
+                        >
+                            <FlatList
+                                data={videos}
+                                renderItem={renderVideos}
+                                contentContainerStyle={Style.videoListContainer}
+                                ListEmptyComponent={renderEmptyList}
+                            />
+                        </Animation>
 
 
             }
