@@ -123,8 +123,28 @@ const Home = ({ navigation }) => {
         }
         const videosTemp2 = videosTemp.filter(function (element: any) {
             const text = searchTxt.toUpperCase()
-            const name = element.node.image.filename.toUpperCase()
-            return name.includes(text)
+            element = element.node
+            if(element.dbData) {
+                const dbData = element.dbData
+                const { name, events, location, description, people } = dbData
+                if(
+                    name.toUpperCase().includes(text)
+                    || moment.unix(dbData.date).format('MMMM-DD-YYYY').toUpperCase().includes(text)
+                    || events.toUpperCase().includes(text)
+                    || location.toUpperCase().includes(text)
+                    || description.toUpperCase().includes(text)
+                    || people.toUpperCase().includes(text)
+                ) {
+                    return name
+                }
+            }
+            else {
+                const name = element.image.filename.toUpperCase()
+                if(name.includes(text) || moment.unix(element.timestamp).format('MMMM-DD-YYYY').toUpperCase().includes(text)) {
+                    return name
+                }
+            }
+
         }).map(function (item: any) {
             return item
         })
@@ -209,11 +229,12 @@ const Home = ({ navigation }) => {
                         <View style={Style.searchBarContainer}>
                             <TextInput
                                 value={search}
-                                placeholder='Search By name'
+                                placeholder='Search By Name, Event, People, Date, Location or Description'
                                 placeholderTextColor={Colors.grey3}
                                 onChangeText={onChangeSearch}
                                 style={{ ...Typography.des, ...Style.searchInput }}
                                 autoFocus
+                                multiline
                             />
                             <TouchableOpacity
                                 activeOpacity={0.6}
