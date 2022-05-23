@@ -1,6 +1,10 @@
 
 
 class GCommonServices {
+    getTimeStamp() {
+        let date = new Date();
+        return date.getTime();
+    }
 
     asyncLoop(iterations: number, func: Function, callback?: Function) {
         var index = 0;

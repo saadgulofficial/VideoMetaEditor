@@ -60,6 +60,23 @@ const Home = ({ navigation }) => {
                                     }
                                     element.dbData = dbElement
                                 }
+
+                                // if(dbElement.clipUri && dbElement.clipUri.length !== 0) {
+                                //     var { date, name, clipUri, endTime, } = dbElement
+                                //     const newE = {
+                                //         dbData: dbElement,
+                                //         group_name: '',
+                                //         image: {
+                                //             filename: name,
+                                //             uri: clipUri,
+                                //             playableDuration: 'endTime',
+                                //             endTime: endTime
+                                //         },
+                                //         timestamp: date
+                                //     }
+                                //     const newE2 = { node: newE }
+                                //     videosArray.push(newE2)
+                                // }
                             });
                             element = { node: element }
                             videosArray.push(element)

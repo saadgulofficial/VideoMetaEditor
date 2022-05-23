@@ -70,7 +70,7 @@ const VideoDetail = ({ route, navigation }) => {
         setLoaderMessage("Saving please wait...")
 
         var id = filename.trim()
-        if(videoDetail.id) {
+        if(videoDetail.id && videoDetail.id.length !== 0) {
             id = videoDetail.id
         }
         var tableName = 'MetaData'

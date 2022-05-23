@@ -4,7 +4,7 @@ import Style from './Style'
 import { GButton, MessageAlert, Header, VideoPlayer, LoaderModal, Loader } from '../../components'
 import { hp, Typography, wp } from '../../global'
 import moment from 'moment'
-import { GSQLite } from '../../services'
+import { CommonServices, GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
 import { Trimmer, ProcessingManager } from 'react-native-video-processing';
 
@@ -23,7 +23,7 @@ const AddClip = ({ route, navigation }) => {
     const [location, setLocation] = useState('')
     const [date, setDate] = useState<any>(timestamp)
     const [description, setDescription] = useState('')
-    const [loader, setLoader] = useState(false)
+    const [loader, setLoader] = useState(true)
     const [loaderMessage, setLoaderMessage] = useState('Loading please wait')
     const [showDatePicker, setShowDatePicker] = useState(false)
 
@@ -48,7 +48,15 @@ const AddClip = ({ route, navigation }) => {
     const onPressDate = () => setShowDatePicker(true)
 
 
-
+    const setData = () => {
+        setEndTime(moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm"))
+        setDate(timestamp)
+        setLoader(false)
+    }
+    useEffect(() => {
+        const clean = setData()
+        return () => clean
+    }, [])
 
 
 
@@ -70,51 +78,50 @@ const AddClip = ({ route, navigation }) => {
                 setEndTime((moment.utc(moment.duration(endTime * 60, "minutes").asMilliseconds()).format("HH:mm")))
             }
         }
-        // const options = {
-        //     startTime,
-        //     endTime,
-        // };
-        // ProcessingManager.trim(uri, options) // like VideoPlayer trim options
-        //     .then((data) => console.log(data));
     }
 
 
     const onSavePress = () => {
         setLoader(true)
         setLoaderMessage("Saving please wait...")
-
-        var id = filename.trim()
-        if(videoDetail.id) {
-            id = videoDetail.id
+        if(startTimeRaw.length === 0) {
+            MessageAlert('Please Select Start of trimmer', 'danger')
+            setLoader(false)
         }
-        var tableName = 'MetaData'
-        var getQuery = {
-            query: "SELECT * FROM MetaData WHERE id = ?",
-            params: [id]
+        else if(endTimeRaw.length === 0) {
+            MessageAlert('Please Select end of trimmer', 'danger')
+            setLoader(false)
         }
-        GSQLite.getData(tableName, getQuery).then((data: any) => {
-            if(data.length !== 0) {
-                var updateQuery = {
-                    query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
-                               people = ?,events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
-                    values: [startTime, endTime, clipName, people, events, location, date, description, id]
-                }
-                GSQLite.update(updateQuery).then(() => {
-                    MessageAlert('Saved in Database', 'success')
+        else if(clipName.trim().length === 0) {
+            MessageAlert('Please Enter clip Name', 'danger')
+            setLoader(false)
+        }
+        else {
+            const options = {
+                startTime: startTimeRaw,
+                endTime: endTimeRaw,
+                saveToCameraRoll: true
+            };
+            ProcessingManager.trim(uri, options)
+                .then((data) => {
+                    if(data) {
+                        var id = CommonServices.getTimeStamp()
+                        console.log(id)
+                        var insertQuery = {
+                            query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipUri) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                            values: [startTime, endTime, clipName, people, events, location, date, description, id, data]
+                        }
+                        GSQLite.insertIntoTable(insertQuery).then(() => {
+                            MessageAlert('Saved in Database', 'success')
+                            setLoader(false)
+                        }).catch(() => setLoader(false))
+                    }
+                })
+                .catch((err) => {
+                    console.log('error while trimmig =>', err)
                     setLoader(false)
-                }).catch(() => setLoader(false))
-            }
-            else {
-                var insertQuery = {
-                    query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id) VALUES (?,?,?,?,?,?,?,?,?)',
-                    values: [startTime, endTime, clipName, people, events, location, date, description, id]
-                }
-                GSQLite.insertIntoTable(insertQuery).then(() => {
-                    MessageAlert('Saved in Database', 'success')
-                    setLoader(false)
-                }).catch(() => setLoader(false))
-            }
-        }).catch(() => setLoader(false))
+                })
+        }
     }
 
 
