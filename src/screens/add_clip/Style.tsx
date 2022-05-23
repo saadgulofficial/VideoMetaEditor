@@ -7,19 +7,6 @@ export default StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.white,
     },
-    heading: {
-        alignSelf: 'center',
-        textAlign: 'center',
-        color: Colors.theme,
-        marginTop: hp(1)
-    },
-    addClip: {
-        color: Colors.color3,
-        fontFamily: Fonts.APPFONT_R,
-        alignSelf: 'center',
-        marginBottom: hp(2),
-        marginTop: hp(1)
-    },
     videoMetaDataCon: {
         borderWidth: 0.7,
         borderColor: Colors.color2,
@@ -28,6 +15,13 @@ export default StyleSheet.create({
         borderRadius: 20,
         paddingVertical: hp(2),
         backgroundColor: Colors.color1,
+    },
+    heading: {
+        alignSelf: 'center',
+        textAlign: 'center',
+        color: Colors.theme,
+        marginTop: hp(1),
+        marginBottom: hp(2)
     },
     fieldContainer: {
         flexDirection: 'row',

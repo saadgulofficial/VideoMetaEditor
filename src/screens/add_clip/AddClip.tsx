@@ -2,32 +2,34 @@ import { View, Text, TextInput, ScrollView, Alert, TouchableOpacity } from 'reac
 import React, { useState, useEffect, useReducer } from 'react'
 import Style from './Style'
 import { GButton, MessageAlert, Header, VideoPlayer, LoaderModal, Loader } from '../../components'
-import { hp, Typography } from '../../global'
+import { hp, Typography, wp } from '../../global'
 import moment from 'moment'
 import { GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
+import { Trimmer, ProcessingManager } from 'react-native-video-processing';
 
-
-const VideoDetail = ({ route, navigation }) => {
+const AddClip = ({ route, navigation }) => {
     const { videoDetail } = route.params
     const { image, timestamp } = videoDetail
     const { filename, uri, playableDuration } = image
 
-    const [startTime, setStartTime] = useState('00:00')
+    const [startTime, setStartTime] = useState('00')
     const [endTime, setEndTime] = useState('')
-    const [videoName, setVideoName] = useState('')
+    const [startTimeRaw, setStartTimeRaw] = useState('')
+    const [endTimeRaw, setEndTimeRaw] = useState('')
+    const [clipName, setClipName] = useState('')
     const [people, setPeople] = useState('')
     const [events, setEvents] = useState('')
     const [location, setLocation] = useState('')
     const [date, setDate] = useState<any>(timestamp)
     const [description, setDescription] = useState('')
-    const [loader, setLoader] = useState(true)
+    const [loader, setLoader] = useState(false)
     const [loaderMessage, setLoaderMessage] = useState('Loading please wait')
     const [showDatePicker, setShowDatePicker] = useState(false)
 
     const onChangeStartTime = (text) => setStartTime(text)
     const onChangeEndTime = (text) => setEndTime(text)
-    const onChangeVideoName = (text) => setVideoName(text)
+    const onChangeClipName = (text) => setClipName(text)
     const onChangePeople = (text) => setPeople(text)
     const onChangeEvents = (text) => setEvents(text)
     const onChangeLocation = (text) => setLocation(text)
@@ -45,25 +47,37 @@ const VideoDetail = ({ route, navigation }) => {
     const onChangeDescription = (text) => setDescription(text)
     const onPressDate = () => setShowDatePicker(true)
 
-    const setData = () => {
-        const { videoDetail } = route.params
-        const { dbData } = videoDetail
-        setEndTime(moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm"))
-        setVideoName(filename.charAt(0).toUpperCase() + filename.slice(1))
-        setDate(timestamp)
-        if(dbData) {
-            const { people, events, location, description } = dbData
-            setPeople(people)
-            setEvents(events)
-            setLocation(location)
-            setDescription(description)
+
+
+
+
+
+
+
+    const onChangeTrim = (startTime, endTime) => {
+        if(startTime || endTime) {
+            const startString = JSON.stringify(startTime)
+            const endString = JSON.stringify(endTime)
+            setStartTimeRaw(startTime)
+            setEndTimeRaw(endTime)
+
+            if(startString.startsWith("0.") || endString.startsWith("0.")) {
+                setStartTime(moment.utc(moment.duration(startTime * 1000, "minutes").asMilliseconds()).format("HH:mm"))
+                setEndTime(moment.utc(moment.duration(endTime * 1000, "minutes").asMilliseconds()).format("HH:mm"))
+            }
+            else {
+                setStartTime(moment.utc(moment.duration(startTime * 60, "minutes").asMilliseconds()).format("HH:mm"))
+                setEndTime((moment.utc(moment.duration(endTime * 60, "minutes").asMilliseconds()).format("HH:mm")))
+            }
         }
-        setLoader(false)
+        // const options = {
+        //     startTime,
+        //     endTime,
+        // };
+        // ProcessingManager.trim(uri, options) // like VideoPlayer trim options
+        //     .then((data) => console.log(data));
     }
-    useEffect(() => {
-        const clean = setData()
-        return () => clean
-    }, [])
+
 
     const onSavePress = () => {
         setLoader(true)
@@ -83,7 +97,7 @@ const VideoDetail = ({ route, navigation }) => {
                 var updateQuery = {
                     query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
                                people = ?,events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
-                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
+                    values: [startTime, endTime, clipName, people, events, location, date, description, id]
                 }
                 GSQLite.update(updateQuery).then(() => {
                     MessageAlert('Saved in Database', 'success')
@@ -93,7 +107,7 @@ const VideoDetail = ({ route, navigation }) => {
             else {
                 var insertQuery = {
                     query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id) VALUES (?,?,?,?,?,?,?,?,?)',
-                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
+                    values: [startTime, endTime, clipName, people, events, location, date, description, id]
                 }
                 GSQLite.insertIntoTable(insertQuery).then(() => {
                     MessageAlert('Saved in Database', 'success')
@@ -103,7 +117,6 @@ const VideoDetail = ({ route, navigation }) => {
         }).catch(() => setLoader(false))
     }
 
-    const onAddClipPress = () => navigation.navigate('AddClip', { videoDetail: videoDetail })
 
     return (
         <View style={Style.container}>
@@ -122,11 +135,15 @@ const VideoDetail = ({ route, navigation }) => {
                 <VideoPlayer
                     uri={uri}
                 />
+                <Trimmer
+                    source={uri}
+                    height={100}
+                    width={300}
+                    onChange={(e) => onChangeTrim(e.startTime, e.endTime)}
+                />
                 <View style={Style.videoMetaDataCon}>
-                    <Text style={{ ...Typography.heading, ...Style.heading }}>Video Meta Deta</Text>
-                    <TouchableOpacity onPress={onAddClipPress}>
-                        <Text style={{ ...Typography.desTwo, ...Style.addClip }}>Add Clip</Text>
-                    </TouchableOpacity>
+                    <Text style={{ ...Typography.heading, ...Style.heading }}>Clip Meta Deta</Text>
+
                     <View style={Style.fieldContainer}>
                         <Text style={{ ...Typography.des, ...Style.fieldLabel }}
                             numberOfLines={1}
@@ -157,12 +174,12 @@ const VideoDetail = ({ route, navigation }) => {
                         <Text style={{ ...Typography.des, ...Style.fieldLabel }}
                             numberOfLines={1}
                         >
-                            Name
+                            Clip Name
                         </Text>
                         <TextInput
-                            value={videoName}
+                            value={clipName}
                             style={{ ...Typography.des, ...Style.fieldInput }}
-                            onChangeText={onChangeVideoName}
+                            onChangeText={onChangeClipName}
                         />
                     </View>
 
@@ -243,7 +260,6 @@ const VideoDetail = ({ route, navigation }) => {
                         />
                     </View>
                 </View>
-
                 <GButton
                     text="Save"
                     onPress={onSavePress}
@@ -253,4 +269,4 @@ const VideoDetail = ({ route, navigation }) => {
     )
 }
 
-export default VideoDetail
+export default AddClip
