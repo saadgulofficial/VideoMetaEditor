@@ -109,23 +109,21 @@ const AddClip = ({ route, navigation }) => {
             ProcessingManager.trim(uri, options)
                 .then(async (data) => {
                     if(data) {
-                        await CameraRoll.save(data, { type: 'video', album: 'Clips' }).then(() => {
-
-                            setLoader(false)
+                        await CameraRoll.save(data, { type: 'video', album: 'Clips' }).then((res) => {
+                            var id = data.split('cache/')[1]
+                            var insertQuery = {
+                                query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id) VALUES (?,?,?,?,?,?,?,?,?)',
+                                values: [startTime, endTime, clipName, people, events, location, date, description, id]
+                            }
+                            GSQLite.insertIntoTable(insertQuery).then(() => {
+                                MessageAlert('Saved in Database', 'success')
+                                setLoader(false)
+                            }).catch(() => setLoader(false))
                         })
-                        //     .catch((error) => {
-                        //         console.log('error while saving video to camera Roll =>', error)
-                        //         CommonServices.commonError()
-                        //     })
-                        // var id = CommonServices.getTimeStamp()
-                        // var insertQuery = {
-                        //     query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipUri) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                        //     values: [startTime, endTime, clipName, people, events, location, date, description, id, data]
-                        // }
-                        // GSQLite.insertIntoTable(insertQuery).then(() => {
-                        //     MessageAlert('Saved in Database', 'success')
-                        //     setLoader(false)
-                        // }).catch(() => setLoader(false))
+                            .catch((error) => {
+                                console.log('error while saving video to camera Roll =>', error)
+                                CommonServices.commonError()
+                            })
                     }
                 })
                 .catch((err) => {
