@@ -7,6 +7,8 @@ import moment from 'moment'
 import { CommonServices, GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
 import { Trimmer, ProcessingManager } from 'react-native-video-processing';
+// import {VideoTrimmer}
+import CameraRoll from "@react-native-community/cameraroll";
 
 const AddClip = ({ route, navigation }) => {
     const { videoDetail } = route.params
@@ -66,14 +68,16 @@ const AddClip = ({ route, navigation }) => {
         if(startTime || endTime) {
             const startString = JSON.stringify(startTime)
             const endString = JSON.stringify(endTime)
-            setStartTimeRaw(startTime)
-            setEndTimeRaw(endTime)
 
             if(startString.startsWith("0.") || endString.startsWith("0.")) {
+                setStartTimeRaw(moment.utc(moment.duration(startTime * 1000, "minutes").asMilliseconds()).format("mm"))
+                setEndTimeRaw(moment.utc(moment.duration(endTime * 1000, "minutes").asMilliseconds()).format("mm"))
                 setStartTime(moment.utc(moment.duration(startTime * 1000, "minutes").asMilliseconds()).format("HH:mm"))
                 setEndTime(moment.utc(moment.duration(endTime * 1000, "minutes").asMilliseconds()).format("HH:mm"))
             }
             else {
+                setStartTimeRaw(moment.utc(moment.duration(startTime * 60, "minutes").asMilliseconds()).format("mm"))
+                setEndTimeRaw((moment.utc(moment.duration(endTime * 60, "minutes").asMilliseconds()).format("mm")))
                 setStartTime(moment.utc(moment.duration(startTime * 60, "minutes").asMilliseconds()).format("HH:mm"))
                 setEndTime((moment.utc(moment.duration(endTime * 60, "minutes").asMilliseconds()).format("HH:mm")))
             }
@@ -103,18 +107,25 @@ const AddClip = ({ route, navigation }) => {
                 saveToCameraRoll: true
             };
             ProcessingManager.trim(uri, options)
-                .then((data) => {
+                .then(async (data) => {
                     if(data) {
-                        var id = CommonServices.getTimeStamp()
-                        console.log(id)
-                        var insertQuery = {
-                            query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipUri) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                            values: [startTime, endTime, clipName, people, events, location, date, description, id, data]
-                        }
-                        GSQLite.insertIntoTable(insertQuery).then(() => {
-                            MessageAlert('Saved in Database', 'success')
+                        await CameraRoll.save(data, { type: 'video', album: 'Clips' }).then(() => {
+
                             setLoader(false)
-                        }).catch(() => setLoader(false))
+                        })
+                        //     .catch((error) => {
+                        //         console.log('error while saving video to camera Roll =>', error)
+                        //         CommonServices.commonError()
+                        //     })
+                        // var id = CommonServices.getTimeStamp()
+                        // var insertQuery = {
+                        //     query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipUri) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                        //     values: [startTime, endTime, clipName, people, events, location, date, description, id, data]
+                        // }
+                        // GSQLite.insertIntoTable(insertQuery).then(() => {
+                        //     MessageAlert('Saved in Database', 'success')
+                        //     setLoader(false)
+                        // }).catch(() => setLoader(false))
                     }
                 })
                 .catch((err) => {
@@ -142,12 +153,15 @@ const AddClip = ({ route, navigation }) => {
                 <VideoPlayer
                     uri={uri}
                 />
-                <Trimmer
-                    source={uri}
-                    height={100}
-                    width={300}
-                    onChange={(e) => onChangeTrim(e.startTime, e.endTime)}
-                />
+                <View style={Style.trimmerCon}>
+                    <Trimmer
+                        source={uri}
+                        height={100}
+                        width={300}
+                        onChange={(e) => onChangeTrim(e.startTime, e.endTime)}
+                    />
+                </View>
+
                 <View style={Style.videoMetaDataCon}>
                     <Text style={{ ...Typography.heading, ...Style.heading }}>Clip Meta Deta</Text>
 

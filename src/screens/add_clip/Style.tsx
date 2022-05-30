@@ -53,5 +53,8 @@ export default StyleSheet.create({
     dateTxt: {
         color: Colors.grey0,
         fontFamily: Fonts.APPFONT_R
+    },
+    trimmerCon: {
+        paddingLeft: wp(5),
     }
 })

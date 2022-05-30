@@ -1,3 +1,4 @@
+import { MessageAlert } from "../components";
 
 
 class GCommonServices {
@@ -5,7 +6,7 @@ class GCommonServices {
         let date = new Date();
         return date.getTime();
     }
-
+    commonError = () => MessageAlert('something went wrong please try again later', 'danger')
     asyncLoop(iterations: number, func: Function, callback?: Function) {
         var index = 0;
         var done = false;
