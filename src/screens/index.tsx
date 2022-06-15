@@ -1,3 +1,5 @@
 export { default as Home } from './home/Home'
 export { default as VideoDetail } from './video_detail/VideoDetail'
 export { default as AddClip } from './add_clip/AddClip'
+export { default as ViewClips } from './view_clips/ViewClips'
+export { default as ClipDetail } from './clip_detail/ClipDetail'

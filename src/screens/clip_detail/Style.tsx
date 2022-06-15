@@ -13,14 +13,7 @@ export default StyleSheet.create({
         color: Colors.theme,
         marginTop: hp(1)
     },
-    addClip: {
-        color: Colors.color3,
-        fontFamily: Fonts.APPFONT_R,
-        alignSelf: 'center',
-        marginBottom: hp(2),
-        marginTop: hp(1)
-    },
-    videoMetaDataCon: {
+    clipMetaDataCon: {
         borderWidth: 0.7,
         borderColor: Colors.color2,
         marginHorizontal: wp(3),
@@ -59,10 +52,5 @@ export default StyleSheet.create({
     dateTxt: {
         color: Colors.grey0,
         fontFamily: Fonts.APPFONT_R
-    },
-    addViewClipCon: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center'
     }
 })

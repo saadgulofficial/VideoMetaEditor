@@ -8,18 +8,16 @@ import { GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
 
 
-const VideoDetail = ({ route, navigation }) => {
-    const { videoDetail } = route.params
-    const { image, timestamp } = videoDetail
-    const { filename, uri, playableDuration } = image
-
+const ClipDetail = ({ route, navigation }) => {
+    const { clipDetail } = route.params
+    const { uri, id } = clipDetail
     const [startTime, setStartTime] = useState('00:00')
     const [endTime, setEndTime] = useState('')
     const [videoName, setVideoName] = useState('')
     const [people, setPeople] = useState('')
     const [events, setEvents] = useState('')
     const [location, setLocation] = useState('')
-    const [date, setDate] = useState<any>(timestamp)
+    const [date, setDate] = useState<any>(clipDetail.date)
     const [description, setDescription] = useState('')
     const [loader, setLoader] = useState(true)
     const [loaderMessage, setLoaderMessage] = useState('Loading please wait')
@@ -33,7 +31,7 @@ const VideoDetail = ({ route, navigation }) => {
     const onChangeLocation = (text) => setLocation(text)
 
     const onCancelDate = () => {
-        setDate(timestamp)
+        setDate(clipDetail.date)
         setShowDatePicker(false)
     }
     const onChangeDate = (text) => {
@@ -46,18 +44,17 @@ const VideoDetail = ({ route, navigation }) => {
     const onPressDate = () => setShowDatePicker(true)
 
     const setData = () => {
-        const { videoDetail } = route.params
-        const { dbData } = videoDetail
-        setEndTime(moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm"))
-        setVideoName(filename.charAt(0).toUpperCase() + filename.slice(1))
-        setDate(timestamp)
-        if(dbData) {
-            const { people, events, location, description } = dbData
-            setPeople(people)
-            setEvents(events)
-            setLocation(location)
-            setDescription(description)
-        }
+        const { clipDetail } = route.params
+        console.log(clipDetail)
+        const { endTime, startTime, name, people, events, location, description } = clipDetail
+        setEndTime(endTime)
+        setStartTime(startTime)
+        setVideoName(name)
+        setDate(clipDetail.date)
+        setPeople(people)
+        setEvents(events)
+        setLocation(location)
+        setDescription(description)
         setLoader(false)
     }
     useEffect(() => {
@@ -67,44 +64,18 @@ const VideoDetail = ({ route, navigation }) => {
 
     const onSavePress = () => {
         setLoader(true)
-        setLoaderMessage("Saving please wait...")
+        setLoaderMessage("Updating please wait...")
 
-        var id = filename.trim()
-        if(videoDetail.id && videoDetail.id.length !== 0) {
-            id = videoDetail.id
-        }
-        var tableName = 'MetaData'
-        var getQuery = {
-            query: "SELECT * FROM MetaData WHERE id = ?",
-            params: [id]
-        }
-        GSQLite.getData(tableName, getQuery).then((data: any) => {
-            if(data.length !== 0) {
-                var updateQuery = {
-                    query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
+        var updateQuery = {
+            query: `UPDATE ClipsData SET startTime = ?,endTime = ? ,name = ?,
                                people = ?,events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
-                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
-                }
-                GSQLite.update(updateQuery).then(() => {
-                    MessageAlert('Saved in Database', 'success')
-                    setLoader(false)
-                }).catch(() => setLoader(false))
-            }
-            else {
-                var insertQuery = {
-                    query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id) VALUES (?,?,?,?,?,?,?,?,?)',
-                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
-                }
-                GSQLite.insertIntoTable(insertQuery).then(() => {
-                    MessageAlert('Saved in Database', 'success')
-                    setLoader(false)
-                }).catch(() => setLoader(false))
-            }
+            values: [startTime, endTime, videoName, people, events, location, date, description, id]
+        }
+        GSQLite.update(updateQuery).then(() => {
+            MessageAlert('Updated', 'success')
+            setLoader(false)
         }).catch(() => setLoader(false))
     }
-
-    const onAddClipPress = () => navigation.navigate('AddClip', { videoDetail: videoDetail })
-    const onViewClipsPress = () => navigation.navigate('ViewClips', { videoDetail: videoDetail })
 
     return (
         <View style={Style.container}>
@@ -123,17 +94,8 @@ const VideoDetail = ({ route, navigation }) => {
                 <VideoPlayer
                     uri={uri}
                 />
-                <View style={Style.videoMetaDataCon}>
-                    <Text style={{ ...Typography.heading, ...Style.heading }}>Video Meta Deta</Text>
-                    <View style={Style.addViewClipCon}>
-                        <TouchableOpacity onPress={onAddClipPress}>
-                            <Text style={{ ...Typography.desTwo, ...Style.addClip }}>Add Clip</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={onViewClipsPress}>
-                            <Text style={{ ...Typography.desTwo, ...Style.addClip, marginLeft: wp(10) }}>View Clips</Text>
-                        </TouchableOpacity>
-                    </View>
-
+                <View style={Style.clipMetaDataCon}>
+                    <Text style={{ ...Typography.heading, ...Style.heading }}>Clip Meta Deta</Text>
                     <View style={Style.fieldContainer}>
                         <Text style={{ ...Typography.des, ...Style.fieldLabel }}
                             numberOfLines={1}
@@ -260,4 +222,4 @@ const VideoDetail = ({ route, navigation }) => {
     )
 }
 
-export default VideoDetail
+export default ClipDetail

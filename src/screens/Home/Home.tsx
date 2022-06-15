@@ -44,7 +44,7 @@ const Home = ({ navigation }) => {
                     setLoader(false)
                 }
                 else {
-                    var videosArray = []
+                    var videosArray: any = []
                     CommonServices.asyncLoop(
                         data.length, (loop) => {
                             var index = loop.iteration();
@@ -60,23 +60,6 @@ const Home = ({ navigation }) => {
                                     }
                                     element.dbData = dbElement
                                 }
-
-                                // if(dbElement.clipUri && dbElement.clipUri.length !== 0) {
-                                //     var { date, name, clipUri, endTime, } = dbElement
-                                //     const newE = {
-                                //         dbData: dbElement,
-                                //         group_name: '',
-                                //         image: {
-                                //             filename: name,
-                                //             uri: clipUri,
-                                //             playableDuration: 'endTime',
-                                //             endTime: endTime
-                                //         },
-                                //         timestamp: date
-                                //     }
-                                //     const newE2 = { node: newE }
-                                //     videosArray.push(newE2)
-                                // }
                             });
                             element = { node: element }
                             videosArray.push(element)
@@ -141,7 +124,7 @@ const Home = ({ navigation }) => {
             setVideos(videosTemp)
             setSearchLoader(false)
         }
-        const videosTemp2 = videosTemp.filter(function (element: any) {
+        const videosTemp2: any = videosTemp.filter(function (element: any) {
             const text = searchTxt.toUpperCase()
             element = element.node
             if(element.dbData) {
@@ -173,7 +156,7 @@ const Home = ({ navigation }) => {
     }
     useFocusEffect(
         React.useCallback(() => {
-            var unsubscribe = null
+            var unsubscribe: any = null
             if(videos.length === 0) {
                 unsubscribe = givePermission()
             }
@@ -234,7 +217,7 @@ const Home = ({ navigation }) => {
             {
                 !showSearchBar ?
                     <View style={{ ...Style.headerContainer, flexDirection: videos.length !== 0 ? 'row' : 'column' }}>
-                        <Text style={{ ...Typography.headingTwo, ...Style.heading, alignSelf: videos.length === 0 ? 'center' : null }}>
+                        <Text style={{ ...Typography.headingTwo, ...Style.heading, alignSelf: videos.length === 0 ? 'center' : 'auto' }}>
                             VIDEO META EDITOR
                         </Text>
                         {

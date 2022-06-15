@@ -1,14 +1,12 @@
-import { View, Text, TextInput, ScrollView, Alert, TouchableOpacity } from 'react-native'
-import React, { useState, useEffect, useReducer } from 'react'
+import { View, Text, TextInput, ScrollView, TouchableOpacity } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import Style from './Style'
-import { GButton, MessageAlert, Header, VideoPlayer, LoaderModal, Loader } from '../../components'
-import { hp, Typography, wp } from '../../global'
+import { GButton, MessageAlert, Header, VideoPlayer, LoaderModal } from '../../components'
+import { hp, Typography } from '../../global'
 import moment from 'moment'
-import { CommonServices, GSQLite } from '../../services'
+import { GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
 import { Trimmer, ProcessingManager } from 'react-native-video-processing';
-// import {VideoTrimmer}
-import CameraRoll from "@react-native-community/cameraroll";
 
 const AddClip = ({ route, navigation }) => {
     const { videoDetail } = route.params
@@ -104,26 +102,34 @@ const AddClip = ({ route, navigation }) => {
             const options = {
                 startTime: startTimeRaw,
                 endTime: endTimeRaw,
-                saveToCameraRoll: true
+                saveToCameraRoll: false
             };
             ProcessingManager.trim(uri, options)
-                .then(async (data) => {
-                    if(data) {
-                        await CameraRoll.save(data, { type: 'video', album: 'Clips' }).then((res) => {
-                            var id = data.split('cache/')[1]
-                            var insertQuery = {
-                                query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id) VALUES (?,?,?,?,?,?,?,?,?)',
-                                values: [startTime, endTime, clipName, people, events, location, date, description, id]
-                            }
-                            GSQLite.insertIntoTable(insertQuery).then(() => {
-                                MessageAlert('Saved in Database', 'success')
-                                setLoader(false)
-                            }).catch(() => setLoader(false))
-                        })
-                            .catch((error) => {
-                                console.log('error while saving video to camera Roll =>', error)
-                                CommonServices.commonError()
-                            })
+                .then(async (clipUri) => {
+                    if(clipUri) {
+                        var id = clipUri.split('cache/')[1]
+                        var videoId = filename.trim()
+                        if(videoDetail.id && videoDetail.id.length !== 0) {
+                            videoId = videoDetail.id
+                        }
+                        var insertQuery = {
+                            query: 'INSERT INTO ClipsData(startTime,endTime,name,people,events,location,date,description, id, videoId, uri) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                            values: [startTime, endTime, clipName, people, events, location, date, description, id, videoId, clipUri]
+                        }
+                        GSQLite.insertIntoTable(insertQuery).then(() => {
+                            MessageAlert('Saved in Database', 'success')
+                            setLoader(false)
+                        }).catch(() => setLoader(false))
+
+                        // await CameraRoll.save(data, { type: 'video', album: 'Clips' }).then((res) => {
+                        // })
+                        //     .catch((error) => {
+                        //         console.log('error while saving video to camera Roll =>', error)
+                        //         CommonServices.commonError()
+                        //     })
+                    }
+                    else {
+                        setLoader(false)
                     }
                 })
                 .catch((err) => {
