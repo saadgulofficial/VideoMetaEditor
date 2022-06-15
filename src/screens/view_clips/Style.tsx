@@ -33,9 +33,15 @@ export default StyleSheet.create({
         height: hp(30),
         borderRadius: 20,
     },
+    fieldContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingRight: wp(2)
+    },
     videoName: {
         marginHorizontal: wp(1),
-        width: wp(90),
+        width: wp(80),
     },
     videoDate: {
         marginHorizontal: wp(1),
@@ -59,4 +65,8 @@ export default StyleSheet.create({
         color: Colors.white,
         fontFamily: Fonts.APPFONT_M
     },
+    threeDotCon: {
+        paddingHorizontal: wp(3),
+        paddingVertical: hp(1)
+    }
 })

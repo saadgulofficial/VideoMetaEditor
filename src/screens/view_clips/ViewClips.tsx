@@ -1,12 +1,15 @@
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Style from './Style'
-import { Header, LoaderModal } from '../../components'
+import { Header, LoaderModal, MessageAlert } from '../../components'
 import { GSQLite } from '../../services'
 import { Animation } from '../../animations'
-import { hp, Typography } from '../../global'
+import { hp, Typography, wp } from '../../global'
 import moment from 'moment'
 import { useFocusEffect } from '@react-navigation/native';
+import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
+import Entypo from 'react-native-vector-icons/Entypo'
+import { Colors } from 'react-native/Libraries/NewAppScreen'
 
 const ViewClips = ({ route, navigation }) => {
     const { videoDetail } = route.params
@@ -14,6 +17,10 @@ const ViewClips = ({ route, navigation }) => {
     const [loader, setLoader] = useState(true)
     const [loaderMessage, setLoaderMessage] = useState('Loading please wait')
     const [clipsList, setClipsList] = useState([])
+
+    const [visibleMenu, setVisibleMenu] = useState(false);
+    const [visibleMenuId, setVisibleMenuId] = useState('')
+
 
     const getData = () => {
         const { image } = videoDetail
@@ -55,9 +62,36 @@ const ViewClips = ({ route, navigation }) => {
     }
 
     const onClipPress = (item) => navigation.navigate('ClipDetail', { clipDetail: item })
+    const showMenu = (id) => {
+        setVisibleMenu(true)
+        setVisibleMenuId(id)
+    }
+
+    const hideMenu = () => {
+        setVisibleMenu(false)
+        setVisibleMenuId('')
+    }
+
+    const onDeletePress = (id) => {
+        setLoader(true)
+        setLoaderMessage('Deleting please wait...')
+        const deleteQuery = {
+            query: 'DELETE FROM  ClipsData where Id=?',
+            params: [id]
+        }
+        GSQLite.delete(deleteQuery).then(() => {
+            MessageAlert('Deleted', 'success')
+            getData()
+        })
+            .catch(() => {
+                setLoader(false)
+            })
+    }
+
+    const onUpdatePress = (item) => navigation.navigate('ClipDetail', { clipDetail: item })
 
     const renderClips = ({ item }) => {
-        const { uri, startTime, endTime, name, date } = item
+        const { uri, startTime, endTime, name, date, id } = item
         return (
             <TouchableOpacity style={Style.videoItemContainer}
                 activeOpacity={0.8}
@@ -75,15 +109,33 @@ const ViewClips = ({ route, navigation }) => {
                         </Text>
                     </View>
                 </View>
-                <Text style={{ ...Typography.desTwo, ...Style.videoName }}
-                    numberOfLines={1}
-                >
-                    {name.charAt(0).toUpperCase() + name.slice(1)}
-                </Text>
-                <Text style={{ ...Typography.reg, ...Style.videoDate }}>
-                    {moment.unix(date).format('MMMM-DD-YYYY')}
-                </Text>
-
+                <View style={Style.fieldContainer}>
+                    <View>
+                        <Text style={{ ...Typography.desTwo, ...Style.videoName }}
+                            numberOfLines={1}
+                        >
+                            {name.charAt(0).toUpperCase() + name.slice(1)}
+                        </Text>
+                        <Text style={{ ...Typography.reg, ...Style.videoDate }}>
+                            {moment.unix(date).format('MMMM-DD-YYYY')}
+                        </Text>
+                    </View>
+                    <Menu
+                        visible={visibleMenu && visibleMenuId === id}
+                        anchor={
+                            <TouchableOpacity style={Style.threeDotCon}
+                                onPress={showMenu.bind(null, id)}
+                                activeOpacity={0.8}
+                            >
+                                <Entypo name='dots-three-vertical' size={wp(5)} color={Colors.black} />
+                            </TouchableOpacity>
+                        }
+                        onRequestClose={hideMenu}
+                    >
+                        <MenuItem onPress={onDeletePress.bind(null, id)}>Delete</MenuItem>
+                        <MenuItem onPress={onUpdatePress.bind(null, item)}>Update</MenuItem>
+                    </Menu>
+                </View>
             </TouchableOpacity>
         )
     }

@@ -8,6 +8,7 @@ import { GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
 
 
+
 const ClipDetail = ({ route, navigation }) => {
     const { clipDetail } = route.params
     const { uri, id } = clipDetail
@@ -62,7 +63,7 @@ const ClipDetail = ({ route, navigation }) => {
         return () => clean
     }, [])
 
-    const onSavePress = () => {
+    const onUpdatePress = () => {
         setLoader(true)
         setLoaderMessage("Updating please wait...")
 
@@ -214,8 +215,8 @@ const ClipDetail = ({ route, navigation }) => {
                 </View>
 
                 <GButton
-                    text="Save"
-                    onPress={onSavePress}
+                    text="Update"
+                    onPress={onUpdatePress}
                 />
             </ScrollView>
         </View>

@@ -122,7 +122,19 @@ class SQLiteClass {
                     this.commonError()
                     reject('')
                 })
+        })
+    }
 
+
+    delete = (deleteQuery: { query, params }) => {
+        return new Promise((resolve, reject) => {
+            this.executeQuery(deleteQuery.query, deleteQuery.params)
+                .then(() => resolve(''))
+                .catch((error) => {
+                    console.log('error while deleting data ->', error)
+                    this.commonError()
+                    reject('')
+                })
         })
     }
 
