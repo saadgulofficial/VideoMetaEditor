@@ -38,7 +38,6 @@ const Home = ({ navigation }) => {
                 params: []
             }
             GSQLite.getData(tableName, getQuery).then((videosListFromDb: any) => {
-                console.log(videosListFromDb)
                 if(videosListFromDb.length === 0) {
                     setVideos(data)
                     setVideosTemp(data)
@@ -52,7 +51,19 @@ const Home = ({ navigation }) => {
                             var element = data[index].node
                             videosListFromDb.forEach(dbElement => {
                                 if(dbElement.id === element.image.filename.trim()) {
-                                    var { date, name } = dbElement
+                                    var { date, name, clipNames } = dbElement
+                                    if(clipNames.length !== 0) {
+                                        var clipNameArray: any = []
+                                        clipNames.split('$').forEach(clipNameElement => {
+                                            const clipNameData = clipNameElement.split('-id-')
+                                            var clipName: any = {
+                                                name: clipNameData[0],
+                                                id: clipNameData[1]
+                                            }
+                                            clipNameArray.push(clipName)
+                                        });
+                                        element.clipNames = clipNameArray
+                                    }
                                     if(data.length !== 0) {
                                         element.timestamp = date
                                     }
@@ -125,35 +136,73 @@ const Home = ({ navigation }) => {
             setVideos(videosTemp)
             setSearchLoader(false)
         }
-        const videosTemp2: any = videosTemp.filter(function (element: any) {
-            const text = searchTxt.toUpperCase()
-            element = element.node
-            if(element.dbData) {
-                const dbData = element.dbData
-                const { name, events, location, description, people } = dbData
-                if(
-                    name.toUpperCase().includes(text)
-                    || moment.unix(dbData.date).format('MMMM-DD-YYYY').toUpperCase().includes(text)
-                    || events.toUpperCase().includes(text)
-                    || location.toUpperCase().includes(text)
-                    || description.toUpperCase().includes(text)
-                    || people.toUpperCase().includes(text)
-                ) {
-                    return name
+        else {
+            const videosTemp2: any = videosTemp.filter(function (element: any) {
+                const text = searchTxt.toUpperCase().replace(/\s/g, '')
+                element = element.node
+                if(element.clipNames && element.clipNames.length !== 0) {
+                    var found = false
+                    element.clipNames.forEach(clipNameElement => {
+                        if(clipNameElement.name.toUpperCase().includes(text)) {
+                            element.clipFound = clipNameElement
+                            found = true
+                        }
+                        else {
+                            element.clipFound = null
+                        }
+                    });
+                    if(found) {
+                        return element
+                    }
+                    else if(element.dbData) {
+                        const dbData = element.dbData
+                        const { name, events, location, description, people } = dbData
+                        if(
+                            name.toUpperCase().replace(/\s/g, '').includes(text)
+                            || moment.unix(dbData.date).format('MMMM-DD-YYYY').toUpperCase().replace(/\s/g, '').includes(text)
+                            || events.toUpperCase().replace(/\s/g, '').includes(text)
+                            || location.toUpperCase().replace(/\s/g, '').includes(text)
+                            || description.toUpperCase().replace(/\s/g, '').includes(text)
+                            || people.toUpperCase().replace(/\s/g, '').includes(text)
+                        ) {
+                            return name
+                        }
+                    }
+                    else {
+                        const name = element.image.filename.toUpperCase().replace(/\s/g, '')
+                        if(name.includes(text) || moment.unix(element.timestamp).format('MMMM-DD-YYYY').toUpperCase().replace(/\s/g, '').includes(text)) {
+                            return name
+                        }
+                    }
                 }
-            }
-            else {
-                const name = element.image.filename.toUpperCase()
-                if(name.includes(text) || moment.unix(element.timestamp).format('MMMM-DD-YYYY').toUpperCase().includes(text)) {
-                    return name
+                else if(element.dbData) {
+                    const dbData = element.dbData
+                    const { name, events, location, description, people } = dbData
+                    if(
+                        name.toUpperCase().replace(/\s/g, '').includes(text)
+                        || moment.unix(dbData.date).format('MMMM-DD-YYYY').toUpperCase().replace(/\s/g, '').includes(text)
+                        || events.toUpperCase().replace(/\s/g, '').includes(text)
+                        || location.toUpperCase().replace(/\s/g, '').includes(text)
+                        || description.toUpperCase().replace(/\s/g, '').includes(text)
+                        || people.toUpperCase().replace(/\s/g, '').includes(text)
+                    ) {
+                        return name
+                    }
                 }
-            }
+                else {
+                    const name = element.image.filename.toUpperCase()
+                    if(name.includes(text) || moment.unix(element.timestamp).format('MMMM-DD-YYYY').toUpperCase().replace(/\s/g, '').includes(text)) {
+                        return name
+                    }
+                }
 
-        }).map(function (item: any) {
-            return item
-        })
-        setVideos(videosTemp2)
-        setSearchLoader(false)
+            }).map(function (item: any) {
+                return item
+            })
+            setVideos(videosTemp2)
+            setSearchLoader(false)
+        }
+
     }
     useFocusEffect(
         React.useCallback(() => {
@@ -170,7 +219,16 @@ const Home = ({ navigation }) => {
         }, [])
     );
 
-    const onVideoPress = (item) => navigation.navigate('VideoDetail', { videoDetail: item })
+    const onVideoPress = (item) => {
+        if(search.length === 0) {
+            item.clipFound = null
+            navigation.navigate('VideoDetail', { videoDetail: item })
+        }
+        else {
+            navigation.navigate('VideoDetail', { videoDetail: item })
+        }
+    }
+
     const renderVideos = ({ item }) => {
         const { timestamp, image } = item.node
         const { uri, filename, playableDuration } = image

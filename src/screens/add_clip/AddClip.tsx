@@ -124,11 +124,11 @@ const AddClip = ({ route, navigation }) => {
                                 params: [videoId]
                             }
                             GSQLite.getData(tableName, getQuery).then((data: any) => {
-                                var clipNamesConcat = clipName.replace(/\s/g, '');
+                                var clipNamesConcat = clipName.replace(/\s/g, '') + '-id-' + id;
                                 if(dbData) {
                                     const { clipNames } = dbData
                                     if(clipNames.length !== 0) {
-                                        clipNamesConcat = clipNames + '$' + clipName.replace(/\s/g, '');
+                                        clipNamesConcat = clipNames + '$' + clipName.replace(/\s/g, '') + '-id-' + id;
                                     }
                                 }
                                 if(data.length !== 0) {
