@@ -108,25 +108,52 @@ const AddClip = ({ route, navigation }) => {
                 .then(async (clipUri) => {
                     if(clipUri) {
                         var id = clipUri.split('cache/')[1]
-                        var videoId = filename.trim()
-                        if(videoDetail.id && videoDetail.id.length !== 0) {
-                            videoId = videoDetail.id
+                        var videoId = filename.replace(/\s/g, '');
+                        const { dbData } = videoDetail
+                        if(dbData) {
+                            videoId = dbData.id
                         }
                         var insertQuery = {
                             query: 'INSERT INTO ClipsData(startTime,endTime,name,people,events,location,date,description, id, videoId, uri) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
                             values: [startTime, endTime, clipName, people, events, location, date, description, id, videoId, clipUri]
                         }
                         GSQLite.insertIntoTable(insertQuery).then(() => {
-                            MessageAlert('Saved in Database', 'success')
-                            setLoader(false)
-                        }).catch(() => setLoader(false))
+                            var tableName = 'MetaData'
+                            var getQuery = {
+                                query: "SELECT * FROM MetaData WHERE id = ?",
+                                params: [videoId]
+                            }
+                            GSQLite.getData(tableName, getQuery).then((data: any) => {
+                                var clipNamesConcat = clipName.replace(/\s/g, '');
+                                if(dbData) {
+                                    const { clipNames } = dbData
+                                    clipNamesConcat = clipNames + '$' + clipName.replace(/\s/g, '');
+                                }
+                                if(data.length !== 0) {
+                                    var updateQuery = {
+                                        query: `UPDATE MetaData SET clipNames = ? WHERE id = ?`,
+                                        values: [clipNamesConcat, videoId]
+                                    }
+                                    GSQLite.update(updateQuery).then(() => {
+                                        MessageAlert('Saved in Database', 'success')
+                                        setLoader(false)
+                                    }).catch(() => setLoader(false))
+                                }
+                                else {
+                                    var startTime = '00:00'
+                                    var endTime = moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm")
+                                    var insertQuery = {
+                                        query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id,clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                                        values: [startTime, endTime, filename, '', '', '', timestamp, '', videoId, clipNamesConcat]
+                                    }
+                                    GSQLite.insertIntoTable(insertQuery).then(() => {
+                                        MessageAlert('Saved in Database', 'success')
+                                        setLoader(false)
+                                    }).catch(() => setLoader(false))
+                                }
+                            }).catch(() => setLoader(false))
 
-                        // await CameraRoll.save(data, { type: 'video', album: 'Clips' }).then((res) => {
-                        // })
-                        //     .catch((error) => {
-                        //         console.log('error while saving video to camera Roll =>', error)
-                        //         CommonServices.commonError()
-                        //     })
+                        }).catch(() => setLoader(false))
                     }
                     else {
                         setLoader(false)
@@ -134,6 +161,7 @@ const AddClip = ({ route, navigation }) => {
                 })
                 .catch((err) => {
                     console.log('error while trimmig =>', err)
+                    MessageAlert("cannot trim this video please try another", 'danger')
                     setLoader(false)
                 })
         }

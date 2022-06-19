@@ -68,10 +68,10 @@ const VideoDetail = ({ route, navigation }) => {
     const onSavePress = () => {
         setLoader(true)
         setLoaderMessage("Saving please wait...")
-
-        var id = filename.trim()
-        if(videoDetail.id && videoDetail.id.length !== 0) {
-            id = videoDetail.id
+        const { dbData } = videoDetail
+        var id = filename.replace(/\s/g, '');
+        if(dbData) {
+            id = dbData.id
         }
         var tableName = 'MetaData'
         var getQuery = {

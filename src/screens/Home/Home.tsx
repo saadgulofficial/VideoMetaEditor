@@ -38,6 +38,7 @@ const Home = ({ navigation }) => {
                 params: []
             }
             GSQLite.getData(tableName, getQuery).then((videosListFromDb: any) => {
+                console.log(videosListFromDb)
                 if(videosListFromDb.length === 0) {
                     setVideos(data)
                     setVideosTemp(data)
