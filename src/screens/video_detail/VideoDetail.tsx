@@ -92,8 +92,8 @@ const VideoDetail = ({ route, navigation }) => {
             }
             else {
                 var insertQuery = {
-                    query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id) VALUES (?,?,?,?,?,?,?,?,?)',
-                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
+                    query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                    values: [startTime, endTime, videoName, people, events, location, date, description, id, '']
                 }
                 GSQLite.insertIntoTable(insertQuery).then(() => {
                     MessageAlert('Saved in Database', 'success')

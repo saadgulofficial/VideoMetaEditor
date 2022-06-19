@@ -127,7 +127,9 @@ const AddClip = ({ route, navigation }) => {
                                 var clipNamesConcat = clipName.replace(/\s/g, '');
                                 if(dbData) {
                                     const { clipNames } = dbData
-                                    clipNamesConcat = clipNames + '$' + clipName.replace(/\s/g, '');
+                                    if(clipNames.length !== 0) {
+                                        clipNamesConcat = clipNames + '$' + clipName.replace(/\s/g, '');
+                                    }
                                 }
                                 if(data.length !== 0) {
                                     var updateQuery = {
@@ -152,7 +154,6 @@ const AddClip = ({ route, navigation }) => {
                                     }).catch(() => setLoader(false))
                                 }
                             }).catch(() => setLoader(false))
-
                         }).catch(() => setLoader(false))
                     }
                     else {

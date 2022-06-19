@@ -25,9 +25,10 @@ const ViewClips = ({ route, navigation }) => {
     const getData = () => {
         const { image } = videoDetail
         const { filename } = image
-        var videoId = filename.trim()
-        if(videoDetail.id && videoDetail.id.length !== 0) {
-            videoId = videoDetail.id
+        var videoId = filename.replace(/\s/g, '');
+        const { dbData } = videoDetail
+        if(dbData) {
+            videoId = dbData.id
         }
         var tableName = 'ClipsData'
         var getQuery = {
