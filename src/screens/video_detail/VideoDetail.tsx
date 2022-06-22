@@ -71,7 +71,6 @@ const VideoDetail = ({ route, navigation }) => {
 
 
     const saveInFileManager = (id) => {
-        // values: [startTime, endTime, videoName, people, events, location, date, description, id]
         const data = {
             startTime: startTime,
             endTime: endTime,
@@ -84,18 +83,19 @@ const VideoDetail = ({ route, navigation }) => {
             id: id
         }
         const PATH = GFileManager.PATHS.videosPath
+        const EXT = GFileManager.EXT.ext1
         GFileManager.makeDirectory(PATH).then(() => {
-            GFileManager.fileExits(`${PATH}/${id}.txt`).then((res) => {
+            GFileManager.fileExits(`${PATH}/${id}${EXT}`).then((res) => {
                 if(res) {
-                    GFileManager.deleteFile(`${PATH}/${id}.txt`).then(() => {
-                        GFileManager.writeFile(`${PATH}/${id}.txt`, data).then(() => {
+                    GFileManager.deleteFile(`${PATH}/${id}${EXT}`).then(() => {
+                        GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
                             MessageAlert('MetaData Saved', 'success')
                             setLoader(false)
                         }).catch(() => setLoader(false))
                     }).catch(() => setLoader(false))
                 }
                 else {
-                    GFileManager.writeFile(`${PATH}/${id}.txt`, data).then(() => {
+                    GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
                         MessageAlert('MetaData Saved', 'success')
                         setLoader(false)
                     }).catch(() => setLoader(false))
@@ -135,8 +135,6 @@ const VideoDetail = ({ route, navigation }) => {
                     values: [startTime, endTime, videoName, people, events, location, date, description, id, '']
                 }
                 GSQLite.insertIntoTable(insertQuery).then(() => {
-                    // MessageAlert('Saved in Database', 'success')
-                    // setLoader(false)
                     saveInFileManager(id)
                 }).catch(() => setLoader(false))
             }

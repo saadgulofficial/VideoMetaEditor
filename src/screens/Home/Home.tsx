@@ -6,7 +6,7 @@ import { hp, Typography, wp } from '../../global'
 import { Colors } from '../../res'
 import CameraRoll from "@react-native-community/cameraroll";
 import { useFocusEffect } from '@react-navigation/native';
-import { CommonServices, GSQLite } from '../../services'
+import { CommonServices, GFileManager, GSQLite } from '../../services'
 import moment from 'moment'
 import { Loader, LoaderModal } from '../../components'
 import _ from 'lodash'
@@ -30,6 +30,33 @@ const Home = ({ navigation }) => {
         setVideos(videosTemp)
     }
 
+    const mergeFileManagerData = (data) => {
+        const { EXT, PATHS, readFile } = GFileManager
+        var videosArray: any = []
+        CommonServices.asyncLoop(
+            data.length, (loop) => {
+                var index = loop.iteration();
+                var element = data[index].node
+                const { image } = element
+                const { filename } = image
+                readFile(`${PATHS.videosPath}/${filename}/${EXT.ext1}`)
+                    .then((data) => {
+                        if(data) {
+                            console.log('data => ', data)
+                        }
+                        else {
+                            console.log('file not found')
+                        }
+                    })
+                    .catch(() => {
+                        console.log('here')
+                    })
+                loop.next()
+            }, () => {
+
+            })
+    }
+
     const getData = async (data) => {
         await GSQLite.openDataBase().then(() => {
             var tableName = 'MetaData'
@@ -39,6 +66,7 @@ const Home = ({ navigation }) => {
             }
             GSQLite.getData(tableName, getQuery).then((videosListFromDb: any) => {
                 if(videosListFromDb.length === 0) {
+                    mergeFileManagerData(data)
                     setVideos(data)
                     setVideosTemp(data)
                     setLoader(false)

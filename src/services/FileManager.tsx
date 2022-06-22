@@ -1,8 +1,5 @@
-import SQLite from 'react-native-sqlite-storage';
-import { MessageAlert } from '../components'
 import RNFS from 'react-native-fs'
 import CommonServices from './CommonService';
-import { enableScreens } from 'react-native-screens';
 
 
 class FileManagerClass {
@@ -10,6 +7,9 @@ class FileManagerClass {
         directoryPath: `${RNFS.DownloadDirectoryPath}/VideoMetaData`,
         videosPath: `${RNFS.DownloadDirectoryPath}/VideoMetaData/Videos`,
         clipsPath: `${RNFS.DownloadDirectoryPath}/VideoMetaData/Clips`,
+    }
+    EXT = {
+        ext1: '.jpg'
     }
 
     makeDirectory = (path) => {
@@ -52,13 +52,20 @@ class FileManagerClass {
 
     readFile = (path) => {
         return new Promise(async (resolve, reject) => {
-            await RNFS.readFile(path).then(data => {
-                resolve(JSON.parse(data))
-            })
-                .catch((error) => {
-                    console.log('error while reading file FileManager =>', error)
-                    reject('')
-                })
+            this.fileExits(path).then((res) => {
+                if(res) {
+                    RNFS.readFile(path).then(data => {
+                        resolve(JSON.parse(data))
+                    })
+                        .catch((error) => {
+                            console.log('error while reading file FileManager =>', error)
+                            reject('')
+                        })
+                }
+                else {
+                    resolve(res)
+                }
+            }).catch(() => reject(''))
         })
     }
 
@@ -90,6 +97,19 @@ class FileManagerClass {
                     console.log('error file checking file exists FileManager =>', error)
                     CommonServices.commonError()
                     reject()
+                })
+        })
+    }
+
+    readDirectory = (path) => {
+        return new Promise(async (resolve, reject) => {
+            await RNFS.readdir(path).then((data) => {
+                resolve(data)
+            })
+                .catch((error) => {
+                    console.log('error while reading directory FileManager =>', error)
+                    CommonServices.commonError()
+                    reject('')
                 })
         })
     }
