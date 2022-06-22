@@ -53,6 +53,7 @@ class FileManagerClass {
     readFile = (path) => {
         return new Promise(async (resolve, reject) => {
             this.fileExits(path).then((res) => {
+                console.log(res)
                 if(res) {
                     RNFS.readFile(path).then(data => {
                         resolve(JSON.parse(data))

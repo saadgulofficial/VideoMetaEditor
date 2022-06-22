@@ -31,7 +31,7 @@ const Home = ({ navigation }) => {
     }
 
     const mergeFileManagerData = (data) => {
-        const { EXT, PATHS, readFile } = GFileManager
+        const { EXT, PATHS } = GFileManager
         var videosArray: any = []
         CommonServices.asyncLoop(
             data.length, (loop) => {
@@ -39,21 +39,49 @@ const Home = ({ navigation }) => {
                 var element = data[index].node
                 const { image } = element
                 const { filename } = image
-                readFile(`${PATHS.videosPath}/${filename.replace(/\s/g, '')}${EXT.ext1}`)
-                    .then((data) => {
-                        if(data) {
-                            console.log('data => ', data)
+                console.log(`${PATHS.videosPath}/${filename.replace(/\s/g, '')}${EXT.ext1}`)
+                GFileManager.readFile(`${PATHS.videosPath}/${filename.replace(/\s/g, '')}${EXT.ext1}`)
+                    .then((fileData: any) => {
+                        if(fileData) {
+                            var { date, name, clipNames } = fileData
+                            if(clipNames.length !== 0) {
+                                var clipNameArray: any = []
+                                clipNames.split('$').forEach(clipNameElement => {
+                                    const clipNameData = clipNameElement.split('-id-')
+                                    var clipName: any = {
+                                        name: clipNameData[0],
+                                        id: clipNameData[1]
+                                    }
+                                    clipNameArray.push(clipName)
+                                });
+                            }
+                            element.clipNames = clipNameArray
+                            if(date.length !== 0) {
+                                element.timestamp = date
+                            }
+                            if(name.length !== 0) {
+                                element.image.filename = name
+                            }
+                            element.dbData = fileData
+                            element = { node: element }
+                            videosArray.push(element)
+                            loop.next()
                         }
                         else {
-                            console.log('file not found')
+                            element = { node: element }
+                            videosArray.push(element)
+                            loop.next()
                         }
                     })
                     .catch(() => {
-                        console.log('here')
+                        setLoader(false)
                     })
-                loop.next()
-            }, () => {
 
+            }, () => {
+                setVideos(videosArray)
+                setVideosTemp(videosArray)
+                forceUpdate()
+                setLoader(false)
             })
     }
 
@@ -67,9 +95,6 @@ const Home = ({ navigation }) => {
             GSQLite.getData(tableName, getQuery).then((videosListFromDb: any) => {
                 if(videosListFromDb.length === 0) {
                     mergeFileManagerData(data)
-                    setVideos(data)
-                    setVideosTemp(data)
-                    setLoader(false)
                 }
                 else {
                     var videosArray: any = []
@@ -92,7 +117,7 @@ const Home = ({ navigation }) => {
                                         });
                                         element.clipNames = clipNameArray
                                     }
-                                    if(data.length !== 0) {
+                                    if(date.length !== 0) {
                                         element.timestamp = date
                                     }
                                     if(name.length !== 0) {

@@ -26,6 +26,7 @@ const VideoDetail = ({ route, navigation }) => {
     const [loader, setLoader] = useState(true)
     const [loaderMessage, setLoaderMessage] = useState('Loading please wait')
     const [showDatePicker, setShowDatePicker] = useState(false)
+    const [clipNames, setClipNames] = useState([])
 
     const onChangeStartTime = (text) => setStartTime(text)
     const onChangeEndTime = (text) => setEndTime(text)
@@ -54,11 +55,12 @@ const VideoDetail = ({ route, navigation }) => {
         setVideoName(filename.charAt(0).toUpperCase() + filename.slice(1))
         setDate(timestamp)
         if(dbData) {
-            const { people, events, location, description } = dbData
+            const { people, events, location, description, clipNames } = dbData
             setPeople(people)
             setEvents(events)
             setLocation(location)
             setDescription(description)
+            setClipNames(clipNames)
         }
         setLoader(false)
     }
@@ -74,13 +76,14 @@ const VideoDetail = ({ route, navigation }) => {
         const data = {
             startTime: startTime,
             endTime: endTime,
-            videoName: videoName,
+            name: videoName,
             people: people,
             events: events,
             location: location,
             date: date,
             description: description,
-            id: id
+            id: id,
+            clipNames: clipNames
         }
         const PATH = GFileManager.PATHS.videosPath
         const EXT = GFileManager.EXT.ext1
@@ -122,8 +125,8 @@ const VideoDetail = ({ route, navigation }) => {
             if(data.length !== 0) {
                 var updateQuery = {
                     query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
-                               people = ?,events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
-                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
+                               people = ?,events = ?, location = ?, date = ?,description = ?, clipNames = ? WHERE id = ?`,
+                    values: [startTime, endTime, videoName, people, events, location, date, description, clipNames, id]
                 }
                 GSQLite.update(updateQuery).then(() => {
                     saveInFileManager(id)
@@ -132,7 +135,7 @@ const VideoDetail = ({ route, navigation }) => {
             else {
                 var insertQuery = {
                     query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                    values: [startTime, endTime, videoName, people, events, location, date, description, id, '']
+                    values: [startTime, endTime, videoName, people, events, location, date, description, id, clipNames]
                 }
                 GSQLite.insertIntoTable(insertQuery).then(() => {
                     saveInFileManager(id)
