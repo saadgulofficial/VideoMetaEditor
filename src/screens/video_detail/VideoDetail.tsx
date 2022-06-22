@@ -4,9 +4,10 @@ import Style from './Style'
 import { GButton, MessageAlert, Header, VideoPlayer, LoaderModal, Loader } from '../../components'
 import { hp, Typography, wp } from '../../global'
 import moment from 'moment'
-import { GSQLite } from '../../services'
+import { GFileManager, GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
 import RNFS from 'react-native-fs'
+
 
 
 const VideoDetail = ({ route, navigation }) => {
@@ -69,65 +70,77 @@ const VideoDetail = ({ route, navigation }) => {
 
 
 
+    const saveInFileManager = (id) => {
+        // values: [startTime, endTime, videoName, people, events, location, date, description, id]
+        const data = {
+            startTime: startTime,
+            endTime: endTime,
+            videoName: videoName,
+            people: people,
+            events: events,
+            location: location,
+            date: date,
+            description: description,
+            id: id
+        }
+        const PATH = GFileManager.PATHS.videosPath
+        GFileManager.makeDirectory(PATH).then(() => {
+            GFileManager.fileExits(`${PATH}/${id}.txt`).then((res) => {
+                if(res) {
+                    GFileManager.deleteFile(`${PATH}/${id}.txt`).then(() => {
+                        GFileManager.writeFile(`${PATH}/${id}.txt`, data).then(() => {
+                            MessageAlert('MetaData Saved', 'success')
+                            setLoader(false)
+                        }).catch(() => setLoader(false))
+                    }).catch(() => setLoader(false))
+                }
+                else {
+                    GFileManager.writeFile(`${PATH}/${id}.txt`, data).then(() => {
+                        MessageAlert('MetaData Saved', 'success')
+                        setLoader(false)
+                    }).catch(() => setLoader(false))
+                }
+            }).catch(() => setLoader(false))
+        })
+            .catch(() => setLoader(false))
+    }
+
     const onSavePress = async () => {
-        // const content = 'test'
-        // const options = {
-        //     data: 'testss'
-        // }
-        // RNFS.writeFile(`${RNFS.DownloadDirectoryPath}/saad.txt`, content).then((res) => {
-        //     console.log('res =>', res)
-        // })
-        //     .catch((error) => {
-        //         console.log('error =>', error)
-        //     })
-
-
-        // try {
-        //     await RNFS.readFile(`${RNFS.DownloadDirectoryPath}/saad.txt`, "utf8").then(data => {
-        //         console.log(data)
-        //     })
-        // }
-        // catch(e) {
-        //     console.log(e)
-        // }
-
-
-
-        // setLoader(true)
-        // setLoaderMessage("Saving please wait...")
-        // const { dbData } = videoDetail
-        // var id = filename.replace(/\s/g, '');
-        // if(dbData) {
-        //     id = dbData.id
-        // }
-        // var tableName = 'MetaData'
-        // var getQuery = {
-        //     query: "SELECT * FROM MetaData WHERE id = ?",
-        //     params: [id]
-        // }
-        // GSQLite.getData(tableName, getQuery).then((data: any) => {
-        //     if(data.length !== 0) {
-        //         var updateQuery = {
-        //             query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
-        //                        people = ?,events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
-        //             values: [startTime, endTime, videoName, people, events, location, date, description, id]
-        //         }
-        //         GSQLite.update(updateQuery).then(() => {
-        //             MessageAlert('Saved in Database', 'success')
-        //             setLoader(false)
-        //         }).catch(() => setLoader(false))
-        //     }
-        //     else {
-        //         var insertQuery = {
-        //             query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
-        //             values: [startTime, endTime, videoName, people, events, location, date, description, id, '']
-        //         }
-        //         GSQLite.insertIntoTable(insertQuery).then(() => {
-        //             MessageAlert('Saved in Database', 'success')
-        //             setLoader(false)
-        //         }).catch(() => setLoader(false))
-        //     }
-        // }).catch(() => setLoader(false))
+        setLoader(true)
+        setLoaderMessage("Saving please wait...")
+        const { dbData } = videoDetail
+        var id = filename.replace(/\s/g, '');
+        if(dbData) {
+            id = dbData.id
+        }
+        var tableName = 'MetaData'
+        var getQuery = {
+            query: "SELECT * FROM MetaData WHERE id = ?",
+            params: [id]
+        }
+        GSQLite.getData(tableName, getQuery).then((data: any) => {
+            if(data.length !== 0) {
+                var updateQuery = {
+                    query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
+                               people = ?,events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
+                    values: [startTime, endTime, videoName, people, events, location, date, description, id]
+                }
+                GSQLite.update(updateQuery).then(() => {
+                    saveInFileManager(id)
+                }).catch(() => setLoader(false))
+            }
+            else {
+                var insertQuery = {
+                    query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                    values: [startTime, endTime, videoName, people, events, location, date, description, id, '']
+                }
+                GSQLite.insertIntoTable(insertQuery).then(() => {
+                    // MessageAlert('Saved in Database', 'success')
+                    // setLoader(false)
+                    saveInFileManager(id)
+                }).catch(() => setLoader(false))
+            }
+        }).catch(() => setLoader(false))
     }
 
     const onAddClipPress = () => navigation.navigate('AddClip', { videoDetail: videoDetail })
