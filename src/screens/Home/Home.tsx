@@ -39,7 +39,7 @@ const Home = ({ navigation }) => {
                 var element = data[index].node
                 const { image } = element
                 const { filename } = image
-                readFile(`${PATHS.videosPath}/${filename}/${EXT.ext1}`)
+                readFile(`${PATHS.videosPath}/${filename.replace(/\s/g, '')}${EXT.ext1}`)
                     .then((data) => {
                         if(data) {
                             console.log('data => ', data)
