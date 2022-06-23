@@ -7,6 +7,7 @@ import moment from 'moment'
 import { GFileManager, GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
 import RNFS from 'react-native-fs'
+import RNFetchBlob from 'rn-fetch-blob'
 
 
 

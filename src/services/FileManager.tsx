@@ -43,7 +43,7 @@ class FileManagerClass {
                 resolve('done')
             })
                 .catch((error) => {
-                    CommonServices.commonError()
+                    // CommonServices.commonError()
                     console.log('error while Writing File FileManager =>', error)
                     reject('')
                 })
@@ -53,7 +53,6 @@ class FileManagerClass {
     readFile = (path) => {
         return new Promise(async (resolve, reject) => {
             this.fileExits(path).then((res) => {
-                console.log(res)
                 if(res) {
                     RNFS.readFile(path).then(data => {
                         resolve(JSON.parse(data))
@@ -74,7 +73,16 @@ class FileManagerClass {
         return new Promise((resolve, reject) => {
             RNFS.exists(path).then((res) => {
                 if(res) {
-                    RNFS.unlink(path).then(() => resolve(''))
+                    RNFS.unlink(path).then(() => {
+                        RNFS.scanFile(path)
+                            .then(() => {
+                                resolve('')
+                            })
+                            .catch(err => {
+                                console.log('error while scanning =>', err);
+                                reject('')
+                            });
+                    })
                         .catch((error) => {
                             console.log('error while deleting file FileManager=>', error)
                             CommonServices.commonError()

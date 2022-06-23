@@ -39,7 +39,6 @@ const Home = ({ navigation }) => {
                 var element = data[index].node
                 const { image } = element
                 const { filename } = image
-                console.log(`${PATHS.videosPath}/${filename.replace(/\s/g, '')}${EXT.ext1}`)
                 GFileManager.readFile(`${PATHS.videosPath}/${filename.replace(/\s/g, '')}${EXT.ext1}`)
                     .then((fileData: any) => {
                         if(fileData) {
@@ -103,7 +102,7 @@ const Home = ({ navigation }) => {
                             var index = loop.iteration();
                             var element = data[index].node
                             videosListFromDb.forEach(dbElement => {
-                                if(dbElement.id === element.image.filename.trim()) {
+                                if(dbElement.id === element.image.filename.replace(/\s/g, '')) {
                                     var { date, name, clipNames } = dbElement
                                     if(clipNames.length !== 0) {
                                         var clipNameArray: any = []
@@ -124,11 +123,49 @@ const Home = ({ navigation }) => {
                                         element.image.filename = name
                                     }
                                     element.dbData = dbElement
+
+                                    element = { node: element }
+                                    videosArray.push(element)
+                                    loop.next()
+                                }
+                                else {
+                                    const { EXT, PATHS } = GFileManager
+                                    GFileManager.readFile(`${PATHS.videosPath}/${element.image.filename.replace(/\s/g, '')}${EXT.ext1}`)
+                                        .then((fileData: any) => {
+                                            if(fileData) {
+                                                var { date, name, clipNames } = fileData
+                                                if(clipNames.length !== 0) {
+                                                    var clipNameArray: any = []
+                                                    clipNames.split('$').forEach(clipNameElement => {
+                                                        const clipNameData = clipNameElement.split('-id-')
+                                                        var clipName: any = {
+                                                            name: clipNameData[0],
+                                                            id: clipNameData[1]
+                                                        }
+                                                        clipNameArray.push(clipName)
+                                                    });
+                                                }
+                                                element.clipNames = clipNameArray
+                                                if(date.length !== 0) {
+                                                    element.timestamp = date
+                                                }
+                                                if(name.length !== 0) {
+                                                    element.image.filename = name
+                                                }
+                                                element.dbData = fileData
+
+                                                element = { node: element }
+                                                videosArray.push(element)
+                                                loop.next()
+                                            }
+                                            else {
+                                                element = { node: element }
+                                                videosArray.push(element)
+                                                loop.next()
+                                            }
+                                        })
                                 }
                             });
-                            element = { node: element }
-                            videosArray.push(element)
-                            loop.next()
                         }, () => {
                             setVideos(videosArray)
                             setVideosTemp(videosArray)
