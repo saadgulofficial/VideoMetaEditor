@@ -95,14 +95,20 @@ const VideoDetail = ({ route, navigation }) => {
                         GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
                             MessageAlert('MetaData Saved', 'success')
                             setLoader(false)
-                        }).catch(() => setLoader(false))
+                        }).catch(() => {
+                            MessageAlert('MetaData Saved', 'success')
+                            setLoader(false)
+                        })
                     }).catch(() => setLoader(false))
                 }
                 else {
                     GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
                         MessageAlert('MetaData Saved', 'success')
                         setLoader(false)
-                    }).catch(() => setLoader(false))
+                    }).catch(() => {
+                        MessageAlert('MetaData Saved', 'success')
+                        setLoader(false)
+                    })
                 }
             }).catch(() => setLoader(false))
         })
@@ -110,39 +116,69 @@ const VideoDetail = ({ route, navigation }) => {
     }
 
     const onSavePress = async () => {
-        setLoader(true)
-        setLoaderMessage("Saving please wait...")
-        const { dbData } = videoDetail
-        var id = filename.replace(/\s/g, '');
-        if(dbData) {
-            id = dbData.id
+        const data = {
+            test: 'test'
         }
-        var tableName = 'MetaData'
-        var getQuery = {
-            query: "SELECT * FROM MetaData WHERE id = ?",
-            params: [id]
+        const path = `${GFileManager.PATHS.videosPath}/Test2.mp4`
+        // RNFS.writeFile(path, JSON.stringify(data), 'base64').then(() => console.log('done'))
+        //     .catch((error) => console.log(error))
+
+        // RNFS.readFile(path, 'base64').then((data) => {
+        //     console.log(data)
+        // })
+        //     .catch((error) => console.log(error))
+
+        let exists = await RNFS.exists(path);
+        if(exists) {
+            // exists call delete
+            await RNFS.unlink(path).then(() => RNFS.scanFile(path))
+            console.log("File Deleted");
+        } else {
+            console.log("File Not Available")
         }
-        GSQLite.getData(tableName, getQuery).then((data: any) => {
-            if(data.length !== 0) {
-                var updateQuery = {
-                    query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
-                               people = ?,events = ?, location = ?, date = ?,description = ?, clipNames = ? WHERE id = ?`,
-                    values: [startTime, endTime, videoName, people, events, location, date, description, clipNames, id]
-                }
-                GSQLite.update(updateQuery).then(() => {
-                    saveInFileManager(id)
-                }).catch(() => setLoader(false))
-            }
-            else {
-                var insertQuery = {
-                    query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                    values: [startTime, endTime, videoName, people, events, location, date, description, id, clipNames]
-                }
-                GSQLite.insertIntoTable(insertQuery).then(() => {
-                    saveInFileManager(id)
-                }).catch(() => setLoader(false))
-            }
-        }).catch(() => setLoader(false))
+
+        // RNFS.unlink(`${GFileManager.PATHS.videosPath}/Test.txt`).then((res) => {
+        // console.log(res)
+        // RNFS.scanFile(`${GFileManager.PATHS.videosPath}/Test.mp3`).then(() => {
+        //     RNFS.writeFile(`${GFileManager.PATHS.videosPath}/Test.mp3`, JSON.stringify(data), 'base64').then(() => console.log('done'))
+        //         .catch((error) => console.log(error))
+        // })
+        // })
+        // .catch((error) => console.log(error))
+
+        // setLoader(true)
+        // setLoaderMessage("Saving please wait...")
+        // const { dbData } = videoDetail
+        // var id = filename.replace(/\s/g, '');
+        // if(dbData) {
+        //     id = dbData.id
+        // }
+        // var tableName = 'MetaData'
+        // var getQuery = {
+        //     query: "SELECT * FROM MetaData WHERE id = ?",
+        //     params: [id]
+        // }
+        // GSQLite.getData(tableName, getQuery).then((data: any) => {
+        //     if(data.length !== 0) {
+        //         var updateQuery = {
+        //             query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
+        //                        people = ?,events = ?, location = ?, date = ?,description = ?, clipNames = ? WHERE id = ?`,
+        //             values: [startTime, endTime, videoName, people, events, location, date, description, clipNames, id]
+        //         }
+        //         GSQLite.update(updateQuery).then(() => {
+        //             saveInFileManager(id)
+        //         }).catch(() => setLoader(false))
+        //     }
+        //     else {
+        //         var insertQuery = {
+        //             query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
+        //             values: [startTime, endTime, videoName, people, events, location, date, description, id, clipNames]
+        //         }
+        //         GSQLite.insertIntoTable(insertQuery).then(() => {
+        //             saveInFileManager(id)
+        //         }).catch(() => setLoader(false))
+        //     }
+        // }).catch(() => setLoader(false))
     }
 
     const onAddClipPress = () => navigation.navigate('AddClip', { videoDetail: videoDetail })
