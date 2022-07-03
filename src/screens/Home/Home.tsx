@@ -8,7 +8,7 @@ import CameraRoll from "@react-native-community/cameraroll";
 import { useFocusEffect } from '@react-navigation/native';
 import { CommonServices, GFileManager, GSQLite } from '../../services'
 import moment from 'moment'
-import { Loader, LoaderModal } from '../../components'
+import { Loader, LoaderModal, MessageAlert } from '../../components'
 import _ from 'lodash'
 import { Animation } from '../../animations'
 
@@ -22,6 +22,7 @@ const Home = ({ navigation }) => {
     const [, forceUpdate] = useReducer(x => x + 1, 0);
     const [showSearchBar, setShowSearchBar] = useState(false)
     const [searchLoader, setSearchLoader] = useState(false)
+    const [loaderMessage, setLoaderMessage] = useState(' ')
 
     const onPressSearchIcon = () => setShowSearchBar(true)
     const onCancelPress = () => {
@@ -92,6 +93,7 @@ const Home = ({ navigation }) => {
                 params: []
             }
             GSQLite.getData(tableName, getQuery).then((videosListFromDb: any) => {
+                console.log('data =>', data)
                 if(videosListFromDb.length === 0) {
                     mergeFileManagerData(data)
                 }
@@ -218,6 +220,7 @@ const Home = ({ navigation }) => {
             if(permission) {
                 setCheckPermission(permission)
                 setLoader(true)
+                setLoaderMessage('Loading please wait...')
                 getPhotos()
             }
             else {
@@ -310,8 +313,9 @@ const Home = ({ navigation }) => {
             }
             else {
                 setLoader(true)
+                setLoaderMessage('Loading please wait...')
                 forceUpdate()
-                unsubscribe = getData(videos)
+                unsubscribe = getPhotos()
             }
             return () => unsubscribe
         }, [])
@@ -326,6 +330,34 @@ const Home = ({ navigation }) => {
             navigation.navigate('VideoDetail', { videoDetail: item })
         }
     }
+
+    const onClearMetaDataPress = (item) => {
+        const id = item.node.dbData.id
+        setLoaderMessage('Clearing please wait...')
+        setLoader(true)
+        const deleteQuery = {
+            query: 'DELETE FROM  MetaData where Id=?',
+            params: [id]
+        }
+        GSQLite.delete(deleteQuery).then(() => {
+            const PATH = GFileManager.PATHS.videosPath
+            const EXT = GFileManager.EXT.ext1
+            GFileManager.deleteFile(`${PATH}/${id}${EXT}`).then(() => {
+                MessageAlert('MetaData Cleared', 'success')
+                // setLoader(false)
+                getPhotos()
+            })
+                .catch(async () => {
+                    MessageAlert('MetaData Cleared', 'success')
+                    // setLoader(false)
+                    getPhotos()
+                })
+        })
+            .catch(() => {
+                setLoader(false)
+            })
+    }
+
 
     const renderVideos = ({ item }) => {
         const { timestamp, image } = item.node
@@ -355,6 +387,9 @@ const Home = ({ navigation }) => {
                 <Text style={{ ...Typography.reg, ...Style.videoDate }}>
                     {moment.unix(timestamp).format('MMMM-DD-YYYY')}
                 </Text>
+                <TouchableOpacity onPress={onClearMetaDataPress.bind(null, item)}>
+                    <Text style={{ color: Colors.black, fontSize: wp(6) }}>Clear</Text>
+                </TouchableOpacity>
             </TouchableOpacity>
         )
     }
@@ -428,6 +463,7 @@ const Home = ({ navigation }) => {
                 loader ?
                     <LoaderModal
                         visible={loader}
+                        message={loaderMessage}
                     />
                     :
                     searchLoader ?
