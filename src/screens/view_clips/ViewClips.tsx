@@ -7,7 +7,7 @@ import { Animation } from '../../animations'
 import { hp, Typography, wp } from '../../global'
 import moment from 'moment'
 import { useFocusEffect } from '@react-navigation/native';
-import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
+import { Menu, MenuItem } from 'react-native-material-menu';
 import Entypo from 'react-native-vector-icons/Entypo'
 import { Colors } from '../../res'
 
@@ -122,7 +122,6 @@ const ViewClips = ({ route, navigation }) => {
                         </Text>
                     </View>
                     <Menu
-
                         visible={visibleMenu && visibleMenuId === id}
                         anchor={
                             <TouchableOpacity style={Style.threeDotCon}

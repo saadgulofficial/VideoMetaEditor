@@ -71,8 +71,6 @@ const VideoDetail = ({ route, navigation }) => {
     }, [])
 
 
-
-
     const saveInFileManager = (id) => {
         const data = {
             startTime: startTime,

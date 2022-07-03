@@ -41,6 +41,21 @@ export default StyleSheet.create({
         color: Colors.grey0,
         fontFamily: Fonts.APPFONT_R
     },
+    optionContainer: {
+        position: 'absolute',
+        top: hp(1),
+        right: wp(2),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    optionInnerContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: width * 0.1,
+        height: width * 0.1 * 1,
+        borderRadius: width * 0.1 * 1 / 2,
+        backgroundColor: Colors.blackRGBA50
+    },
     durationContainer: {
         borderWidth: 0,
         position: 'absolute',

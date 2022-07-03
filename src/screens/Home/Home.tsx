@@ -11,6 +11,8 @@ import moment from 'moment'
 import { Loader, LoaderModal, MessageAlert } from '../../components'
 import _ from 'lodash'
 import { Animation } from '../../animations'
+import Entypo from 'react-native-vector-icons/Entypo'
+import { Menu, MenuItem } from 'react-native-material-menu';
 
 
 const Home = ({ navigation }) => {
@@ -24,7 +26,21 @@ const Home = ({ navigation }) => {
     const [searchLoader, setSearchLoader] = useState(false)
     const [loaderMessage, setLoaderMessage] = useState(' ')
 
+    const [visibleMenu, setVisibleMenu] = useState(false);
+    const [visibleMenuId, setVisibleMenuId] = useState('')
+
+
     const onPressSearchIcon = () => setShowSearchBar(true)
+
+    const showMenu = (id) => {
+        setVisibleMenu(true)
+        setVisibleMenuId(id)
+    }
+    const hideMenu = () => {
+        setVisibleMenu(false)
+        setVisibleMenuId('')
+    }
+
     const onCancelPress = () => {
         setShowSearchBar(false)
         setSearch('')
@@ -322,6 +338,7 @@ const Home = ({ navigation }) => {
     );
 
     const onVideoPress = (item) => {
+        hideMenu()
         if(search.length === 0) {
             item.clipFound = null
             navigation.navigate('VideoDetail', { videoDetail: item })
@@ -332,6 +349,7 @@ const Home = ({ navigation }) => {
     }
 
     const onClearMetaDataPress = (item) => {
+        hideMenu()
         const id = item.node.dbData.id
         setLoaderMessage('Clearing please wait...')
         setLoader(true)
@@ -342,15 +360,13 @@ const Home = ({ navigation }) => {
         GSQLite.delete(deleteQuery).then(() => {
             const PATH = GFileManager.PATHS.videosPath
             const EXT = GFileManager.EXT.ext1
-            GFileManager.deleteFile(`${PATH}/${id}${EXT}`).then(() => {
+            GFileManager.deleteFile(`${PATH}/${id}${EXT}`).then(async () => {
+                await getPhotos()
                 MessageAlert('MetaData Cleared', 'success')
-                // setLoader(false)
-                getPhotos()
             })
                 .catch(async () => {
+                    await getPhotos()
                     MessageAlert('MetaData Cleared', 'success')
-                    // setLoader(false)
-                    getPhotos()
                 })
         })
             .catch(() => {
@@ -373,6 +389,29 @@ const Home = ({ navigation }) => {
                         resizeMode='cover'
                         style={Style.videoThumbnail}
                     />
+                    {
+                        item.node.dbData &&
+                        <View style={Style.optionContainer}>
+                            <Menu
+
+                                visible={visibleMenu && visibleMenuId === item.node.dbData.id}
+                                anchor={
+                                    <TouchableOpacity style={Style.optionInnerContainer}
+                                        onPress={showMenu.bind(null, item.node.dbData.id)}
+                                        activeOpacity={0.5}
+                                    >
+                                        <Entypo name="dots-three-vertical" color={Colors.white} size={wp(5)} />
+                                    </TouchableOpacity>
+                                }
+                                onRequestClose={hideMenu}
+                            >
+                                <MenuItem onPress={onClearMetaDataPress.bind(null, item)} textStyle={{ color: Colors.black }}>Clear MetaData</MenuItem>
+                                <MenuItem onPress={onVideoPress.bind(null, item.node)} textStyle={{ color: Colors.black }}>Edit</MenuItem>
+                            </Menu>
+                        </View>
+                    }
+
+
                     <View style={Style.durationContainer}>
                         <Text style={{ ...Typography.reg, ...Style.durationTxt }}>
                             {moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm")} Min
@@ -387,9 +426,6 @@ const Home = ({ navigation }) => {
                 <Text style={{ ...Typography.reg, ...Style.videoDate }}>
                     {moment.unix(timestamp).format('MMMM-DD-YYYY')}
                 </Text>
-                <TouchableOpacity onPress={onClearMetaDataPress.bind(null, item)}>
-                    <Text style={{ color: Colors.black, fontSize: wp(6) }}>Clear</Text>
-                </TouchableOpacity>
             </TouchableOpacity>
         )
     }
