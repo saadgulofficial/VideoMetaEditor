@@ -146,7 +146,7 @@ const AddClip = ({ route, navigation }) => {
                                     var endTime = moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm")
                                     var insertQuery = {
                                         query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id,clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                                        values: [startTime, endTime, filename, '', '', '', timestamp, '', videoId, clipNamesConcat]
+                                        values: [startTime, endTime, filename, ' ', ' ', ' ', timestamp, ' ', videoId, clipNamesConcat]
                                     }
                                     GSQLite.insertIntoTable(insertQuery).then(() => {
                                         MessageAlert('Saved in Database', 'success')

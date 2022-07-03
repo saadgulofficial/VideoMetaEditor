@@ -101,7 +101,7 @@ const Home = ({ navigation }) => {
                         data.length, (loop) => {
                             var index = loop.iteration();
                             var element = data[index].node
-                            videosListFromDb.forEach(dbElement => {
+                            videosListFromDb.every(dbElement => {
                                 if(dbElement.id === element.image.filename.replace(/\s/g, '')) {
                                     var { date, name, clipNames } = dbElement
                                     if(clipNames.length !== 0) {
@@ -123,7 +123,6 @@ const Home = ({ navigation }) => {
                                         element.image.filename = name
                                     }
                                     element.dbData = dbElement
-
                                     element = { node: element }
                                     videosArray.push(element)
                                     loop.next()
@@ -159,14 +158,22 @@ const Home = ({ navigation }) => {
                                                 loop.next()
                                             }
                                             else {
-                                                element = { node: element }
-                                                videosArray.push(element)
-                                                loop.next()
+                                                if(element.node) {
+                                                    videosArray.push(element)
+                                                    loop.next()
+                                                }
+                                                else {
+                                                    element = { node: element }
+                                                    videosArray.push(element)
+                                                    loop.next()
+                                                }
                                             }
                                         })
                                 }
                             });
+
                         }, () => {
+                            console.log(videosArray)
                             setVideos(videosArray)
                             setVideosTemp(videosArray)
                             forceUpdate()
