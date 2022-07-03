@@ -4,7 +4,7 @@ import Style from './Style'
 import { GButton, MessageAlert, Header, VideoPlayer, LoaderModal } from '../../components'
 import { hp, Typography } from '../../global'
 import moment from 'moment'
-import { GSQLite } from '../../services'
+import { GFileManager, GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
 import { Trimmer, ProcessingManager } from 'react-native-video-processing';
 
@@ -142,16 +142,46 @@ const AddClip = ({ route, navigation }) => {
                                     }).catch(() => setLoader(false))
                                 }
                                 else {
-                                    var startTime = '00:00'
-                                    var endTime = moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm")
-                                    var insertQuery = {
-                                        query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id,clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                                        values: [startTime, endTime, filename, ' ', ' ', ' ', timestamp, ' ', videoId, clipNamesConcat]
-                                    }
-                                    GSQLite.insertIntoTable(insertQuery).then(() => {
-                                        MessageAlert('Saved in Database', 'success')
-                                        setLoader(false)
-                                    }).catch(() => setLoader(false))
+                                    GFileManager.readFile(`${GFileManager.PATHS.videosPath}/${filename.replace(/\s/g, '')}${GFileManager.EXT.ext1}`)
+                                        .then((fileData: any) => {
+                                            if(fileData) {
+                                                var { startTime, endTime, date, name, people, events, location, description } = fileData
+                                                var insertQuery = {
+                                                    query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id,clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                                                    values: [startTime, endTime, name, people, events, location, date, description, videoId, clipNamesConcat]
+                                                }
+                                                GSQLite.insertIntoTable(insertQuery).then(() => {
+                                                    MessageAlert('Saved in Database', 'success')
+                                                    setLoader(false)
+                                                }).catch(() => setLoader(false))
+                                            }
+                                            else {
+                                                var startTimePrev = '00:00'
+                                                var endTimePrev = moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm")
+                                                var insertQuery = {
+                                                    query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id,clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                                                    values: [startTimePrev, endTimePrev, filename, ' ', ' ', ' ', timestamp, ' ', videoId, clipNamesConcat]
+                                                }
+                                                GSQLite.insertIntoTable(insertQuery).then(() => {
+                                                    MessageAlert('Saved in Database', 'success')
+                                                    setLoader(false)
+                                                }).catch(() => setLoader(false))
+                                            }
+                                        })
+                                        .catch((error) => {
+                                            console.log('error while reading file from Add clip =>', error)
+                                            var startTimePrev = '00:00'
+                                            var endTimePrev = moment.utc(moment.duration(playableDuration, "minutes").asMilliseconds()).format("HH:mm")
+                                            var insertQuery = {
+                                                query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id,clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                                                values: [startTimePrev, endTimePrev, filename, ' ', ' ', ' ', timestamp, ' ', videoId, clipNamesConcat]
+                                            }
+                                            GSQLite.insertIntoTable(insertQuery).then(() => {
+                                                MessageAlert('Saved in Database', 'success')
+                                                setLoader(false)
+                                            }).catch(() => setLoader(false))
+                                        })
+
                                 }
                             }).catch(() => setLoader(false))
                         }).catch(() => setLoader(false))

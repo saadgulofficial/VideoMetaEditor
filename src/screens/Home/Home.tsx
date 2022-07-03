@@ -101,7 +101,8 @@ const Home = ({ navigation }) => {
                         data.length, (loop) => {
                             var index = loop.iteration();
                             var element = data[index].node
-                            videosListFromDb.every(dbElement => {
+                            // videosListFromDb.every(dbElement => {
+                            for(let dbElement of videosListFromDb) {
                                 if(dbElement.id === element.image.filename.replace(/\s/g, '')) {
                                     var { date, name, clipNames } = dbElement
                                     if(clipNames.length !== 0) {
@@ -126,6 +127,7 @@ const Home = ({ navigation }) => {
                                     element = { node: element }
                                     videosArray.push(element)
                                     loop.next()
+                                    break
                                 }
                                 else {
                                     const { EXT, PATHS } = GFileManager
@@ -159,7 +161,6 @@ const Home = ({ navigation }) => {
                                             }
                                             else {
                                                 if(element.node) {
-                                                    videosArray.push(element)
                                                     loop.next()
                                                 }
                                                 else {
@@ -170,10 +171,10 @@ const Home = ({ navigation }) => {
                                             }
                                         })
                                 }
-                            });
+                            }
+                            // );
 
                         }, () => {
-                            console.log(videosArray)
                             setVideos(videosArray)
                             setVideosTemp(videosArray)
                             forceUpdate()

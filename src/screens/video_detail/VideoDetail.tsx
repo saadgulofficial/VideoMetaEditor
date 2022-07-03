@@ -95,7 +95,8 @@ const VideoDetail = ({ route, navigation }) => {
                         GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
                             MessageAlert(videoDetail.dbData ? 'MetaData Updated' : 'MetaData Saved', 'success')
                             setLoader(false)
-                        }).catch(() => {
+                        }).catch((error) => {
+                            console.log('error while writing file =>', error)
                             MessageAlert(videoDetail.dbData ? 'MetaData Updated' : 'MetaData Saved', 'success')
                             setLoader(false)
                         })
