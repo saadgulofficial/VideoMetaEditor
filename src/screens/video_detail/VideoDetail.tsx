@@ -93,20 +93,20 @@ const VideoDetail = ({ route, navigation }) => {
                 if(res) {
                     GFileManager.deleteFile(`${PATH}/${id}${EXT}`).then(() => {
                         GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
-                            MessageAlert('MetaData Saved', 'success')
+                            MessageAlert(videoDetail.dbData ? 'MetaData Updated' : 'MetaData Saved', 'success')
                             setLoader(false)
                         }).catch(() => {
-                            MessageAlert('MetaData Saved', 'success')
+                            MessageAlert(videoDetail.dbData ? 'MetaData Updated' : 'MetaData Saved', 'success')
                             setLoader(false)
                         })
                     }).catch(() => setLoader(false))
                 }
                 else {
                     GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
-                        MessageAlert('MetaData Saved', 'success')
+                        MessageAlert(videoDetail.dbData ? 'MetaData Updated' : 'MetaData Saved', 'success')
                         setLoader(false)
                     }).catch(() => {
-                        MessageAlert('MetaData Saved', 'success')
+                        MessageAlert(videoDetail.dbData ? 'MetaData Updated' : 'MetaData Saved', 'success')
                         setLoader(false)
                     })
                 }
@@ -117,7 +117,7 @@ const VideoDetail = ({ route, navigation }) => {
 
     const onSavePress = async () => {
         setLoader(true)
-        setLoaderMessage("Saving please wait...")
+        setLoaderMessage(videoDetail.dbData ? "Updating please wait" : "Saving please wait...")
         const { dbData } = videoDetail
         var id = filename.replace(/\s/g, '');
         if(dbData) {
@@ -300,7 +300,7 @@ const VideoDetail = ({ route, navigation }) => {
                 </View>
 
                 <GButton
-                    text="Save"
+                    text={videoDetail.dbData ? "Update" : "Save"}
                     onPress={onSavePress}
                 />
             </ScrollView>

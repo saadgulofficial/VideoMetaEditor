@@ -9,7 +9,7 @@ import moment from 'moment'
 import { useFocusEffect } from '@react-navigation/native';
 import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
 import Entypo from 'react-native-vector-icons/Entypo'
-import { Colors } from 'react-native/Libraries/NewAppScreen'
+import { Colors } from '../../res'
 
 const ViewClips = ({ route, navigation }) => {
     const { videoDetail } = route.params
@@ -122,6 +122,7 @@ const ViewClips = ({ route, navigation }) => {
                         </Text>
                     </View>
                     <Menu
+
                         visible={visibleMenu && visibleMenuId === id}
                         anchor={
                             <TouchableOpacity style={Style.threeDotCon}
@@ -133,8 +134,8 @@ const ViewClips = ({ route, navigation }) => {
                         }
                         onRequestClose={hideMenu}
                     >
-                        <MenuItem onPress={onDeletePress.bind(null, id)}>Delete</MenuItem>
-                        <MenuItem onPress={onUpdatePress.bind(null, item)}>Update</MenuItem>
+                        <MenuItem onPress={onDeletePress.bind(null, id)} textStyle={{ color: Colors.black }}>Clear</MenuItem>
+                        <MenuItem onPress={onUpdatePress.bind(null, item)} textStyle={{ color: Colors.black }}>Update</MenuItem>
                     </Menu>
                 </View>
             </TouchableOpacity>
