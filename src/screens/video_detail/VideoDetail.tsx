@@ -70,8 +70,7 @@ const VideoDetail = ({ route, navigation }) => {
         }
 
         // @NewFieldCodeVideo nechy wala code uncommit kr dena or same oper wala code commit kr dena hai 
-        // or new newFieldName ko replace kr dena  ha nechy dono jagan sy aik dbData k andur sy or dosra setNewField(newFieldName) es k andur sy
-        //  or oski jagan wo name lhekna ha jo db mein field add krty hovay lkah tha
+        // or  newFieldName jahan lkah ha 2 jagan oski jaga tmhari database mein jo column ka name lkah ha wo add kr dena ha
 
         // if(dbData) {
         //     const { people, events, location, description, clipNames, newFieldName } = dbData
