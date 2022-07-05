@@ -12,6 +12,12 @@ import DatePicker from 'react-native-date-picker'
 const ClipDetail = ({ route, navigation }) => {
     const { clipDetail } = route.params
     const { uri, id } = clipDetail
+
+    // @NewFieldCodeClip nechy wali two line new field k leah yeh already un commit ha
+    const [newField, setNewField] = useState('')
+    const onChangeNewField = (text) => setNewField(text)
+
+
     const [startTime, setStartTime] = useState('00:00')
     const [endTime, setEndTime] = useState('')
     const [videoName, setVideoName] = useState('')
@@ -46,8 +52,10 @@ const ClipDetail = ({ route, navigation }) => {
 
     const setData = () => {
         const { clipDetail } = route.params
-        console.log(clipDetail)
         const { endTime, startTime, name, people, events, location, description } = clipDetail
+
+        // @NewFieldCodeClip nechy wali line uncommit kr dena ha or same oper wali line commit kr deni hai or newField ki jagan jo name ha field ka database mein wo lhekna ha
+        // const { endTime, startTime, name, people, events, location, description, newField} = clipDetail
         setEndTime(endTime)
         setStartTime(startTime)
         setVideoName(name)
@@ -56,6 +64,9 @@ const ClipDetail = ({ route, navigation }) => {
         setEvents(events)
         setLocation(location)
         setDescription(description)
+
+        // @NewFieldCodeClip  nechy wali line uncommit krni ha or newField mein wo name lhekna ha to database mein ha name
+        // setNewField(newField)
         setLoader(false)
     }
     useEffect(() => {
@@ -72,6 +83,16 @@ const ClipDetail = ({ route, navigation }) => {
                                people = ?,events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
             values: [startTime, endTime, videoName, people, events, location, date, description, id]
         }
+
+        //@NewFieldCodeClip nechy wala code uncommit krna ha or same oper wala code commit kr dena ha or 
+        // query mein newField ki jagan same name lhekna ha jo data base clip k table mein lkah or values ko nhi cherna ha
+
+        // var updateQuery = {
+        //     query: `UPDATE ClipsData SET startTime = ?,endTime = ? ,name = ?,
+        //                        people = ?,events = ?, location = ?, date = ?,description = ?, newField =? WHERE id = ?`,
+        // values: [startTime, endTime, videoName, people, events, location, date, description, newField,id]
+        // }
+
         GSQLite.update(updateQuery).then(() => {
             MessageAlert('Updated', 'success')
             setLoader(false)
@@ -212,6 +233,26 @@ const ClipDetail = ({ route, navigation }) => {
                             multiline
                         />
                     </View>
+
+                    { /* //@NewFieldCodeClip nechy wala code uncommit krna ha new field k leah code select kr k ctrl + /  press krna ha uncommit k leah 
+                       or new Field ka Name lhekna ha jahan nechy New field Name lkah ha
+                     */}
+
+                    {/* <View style={{ ...Style.fieldContainer, alignItems: 'flex-start' }}>
+                        <Text style={{ ...Typography.des, ...Style.fieldLabel, marginTop: hp(0.5) }}
+                            numberOfLines={1}
+                        >
+                            New Field Name
+                        </Text>
+                        <TextInput
+                            value={newField}
+                            style={{ ...Typography.des, ...Style.fieldInput, textAlignVertical: 'top', height: hp(20) }}
+                            onChangeText={onChangeNewField}
+                            multiline
+                        />
+                    </View> */}
+
+
                 </View>
 
                 <GButton

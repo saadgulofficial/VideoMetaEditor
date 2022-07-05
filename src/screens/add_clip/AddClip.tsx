@@ -13,6 +13,10 @@ const AddClip = ({ route, navigation }) => {
     const { image, timestamp } = videoDetail
     const { filename, uri, playableDuration } = image
 
+    // @NewFieldCodeClip nechy wali 2 lines new field k leah hein yeh already uncommit hein
+    const [newField, setNewField] = useState('')
+    const onChangeNewField = (text) => setNewField(text)
+
     const [startTime, setStartTime] = useState('00')
     const [endTime, setEndTime] = useState('')
     const [startTimeRaw, setStartTimeRaw] = useState('')
@@ -117,6 +121,15 @@ const AddClip = ({ route, navigation }) => {
                             query: 'INSERT INTO ClipsData(startTime,endTime,name,people,events,location,date,description, id, videoId, uri) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
                             values: [startTime, endTime, clipName, people, events, location, date, description, id, videoId, clipUri]
                         }
+                        // @NewFieldCodeClip nechy wala code uncommit krna ha or same oper wala code commit kr dena ha or query mein newField ki jagan field ka name lhekna ha jo database mein add
+                        // keya ha clip ki field ka name or values ko nhi cherna ha wo esy he rahen ge
+
+                        // var insertQuery = {
+                        //     query: 'INSERT INTO ClipsData(startTime,endTime,name,people,events,location,date,description, id, videoId, uri, newField) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+                        //     values: [startTime, endTime, clipName, people, events, location, date, description, id, videoId, clipUri, newField]
+                        // }
+
+
                         GSQLite.insertIntoTable(insertQuery).then(() => {
                             var tableName = 'MetaData'
                             var getQuery = {
@@ -343,6 +356,25 @@ const AddClip = ({ route, navigation }) => {
                             multiline
                         />
                     </View>
+
+                    { /* //@NewFieldCodeClip nechy wala code uncommit krna ha new field k leah code select kr k ctrl + /  press krna ha uncommit k leah 
+                       or new Field ka Name lhekna ha jahan nechy New field Name lkah ha
+                     */}
+
+
+                    {/* <View style={Style.fieldContainer}>
+                        <Text style={{ ...Typography.des, ...Style.fieldLabel }}
+                            numberOfLines={1}
+                        >
+                            New Field Name
+                        </Text>
+                        <TextInput
+                            value={newField}
+                            style={{ ...Typography.des, ...Style.fieldInput }}
+                            onChangeText={onChangeNewField}
+                        />
+                    </View> */}
+
                 </View>
                 <GButton
                     text="Save"

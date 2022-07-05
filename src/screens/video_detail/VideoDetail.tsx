@@ -6,8 +6,6 @@ import { hp, Typography, wp } from '../../global'
 import moment from 'moment'
 import { GFileManager, GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
-import RNFS from 'react-native-fs'
-import RNFetchBlob from 'rn-fetch-blob'
 
 
 
@@ -28,6 +26,13 @@ const VideoDetail = ({ route, navigation }) => {
     const [loaderMessage, setLoaderMessage] = useState('Loading please wait')
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [clipNames, setClipNames] = useState([])
+
+    //@NewFieldCodeVideo nechy wali two lines new field k leah add ki hein yeh already uncommit hein
+    const [newField, setNewField] = useState('')
+    const onChangeNewField = (text) => setNewField(text)
+
+
+
 
     const onChangeStartTime = (text) => setStartTime(text)
     const onChangeEndTime = (text) => setEndTime(text)
@@ -63,6 +68,21 @@ const VideoDetail = ({ route, navigation }) => {
             setDescription(description)
             setClipNames(clipNames)
         }
+
+        // @NewFieldCodeVideo nechy wala code uncommit kr dena or same oper wala code commit kr dena hai 
+        // or new newFieldName ko replace kr dena  ha nechy dono jagan sy aik dbData k andur sy or dosra setNewField(newFieldName) es k andur sy
+        //  or oski jagan wo name lhekna ha jo db mein field add krty hovay lkah tha
+
+        // if(dbData) {
+        //     const { people, events, location, description, clipNames, newFieldName } = dbData
+        //     setPeople(people)
+        //     setEvents(events)
+        //     setLocation(location)
+        //     setDescription(description)
+        //     setClipNames(clipNames)
+        //     setNewField(newFieldName)
+        // }
+
         setLoader(false)
     }
     useEffect(() => {
@@ -82,7 +102,9 @@ const VideoDetail = ({ route, navigation }) => {
             date: date,
             description: description,
             id: id,
-            clipNames: clipNames
+            clipNames: clipNames,
+            //@NewFieldCodeVideo nechy wala code uncommit kr dena ha or field ka name jo k  : sy pehly ha wo wohi kr dena ha jo database mein add keya ha : es k bad walay ko nhi cherna
+            //  newField: newField
         }
         const PATH = GFileManager.PATHS.videosPath
         const EXT = GFileManager.EXT.ext1
@@ -134,6 +156,18 @@ const VideoDetail = ({ route, navigation }) => {
                                people = ?,events = ?, location = ?, date = ?,description = ?, clipNames = ? WHERE id = ?`,
                     values: [startTime, endTime, videoName, people, events, location, date, description, clipNames, id]
                 }
+
+                //  @newFieldCodeVideo New field k leah nechy wala code uncommit krna ha and oper wala code commit kr dena ha var updateQuery wala code jo same code oper hai
+                // or nechy jo query wali line mein newField =? lkah os  mein new field ki jagan field ka name lhekna 
+                //  ha yeh name same hona chayei DB mein jo field name add kro ge os sy and yad rhy values wala apny nhi cherna ha os mein esy he newField lkah rehny dena ha
+
+                // var updateQuery = {
+                //     query: `UPDATE MetaData SET startTime = ?,endTime = ? ,name = ?,
+                //                people = ?,events = ?, location = ?, date = ?,description = ?, clipNames = ?, newField=?, WHERE id = ?`,
+                //     values: [startTime, endTime, videoName, people, events, location, date, description, clipNames, newField,id]
+                // }
+
+
                 GSQLite.update(updateQuery).then(() => {
                     saveInFileManager(id)
                 }).catch(() => setLoader(false))
@@ -143,6 +177,15 @@ const VideoDetail = ({ route, navigation }) => {
                     query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipNames) VALUES (?,?,?,?,?,?,?,?,?,?)',
                     values: [startTime, endTime, videoName, people, events, location, date, description, id, clipNames]
                 }
+
+                //  @newFieldCodeVideo nechy wala code uncommit kr dena ha or same jo open code ha wo commit kr dena ha var insertQuery wala
+                //or query mein jahan newField lkah ha wahan newField ka name replace kr dena ha jo name Db mein field add krty hovay lkah ho ga
+
+                // var insertQuery = {
+                //     query: 'INSERT INTO MetaData(startTime,endTime,name,people,events,location,date,description, id, clipNames, newField) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                //     values: [startTime, endTime, videoName, people, events, location, date, description, id, clipNames, newField]
+                // }
+
                 GSQLite.insertIntoTable(insertQuery).then(() => {
                     saveInFileManager(id)
                 }).catch(() => setLoader(false))
@@ -296,6 +339,23 @@ const VideoDetail = ({ route, navigation }) => {
                             multiline
                         />
                     </View>
+
+                    { /* //@NewFieldCodeVideo nechy wala code uncommit krna ha new field k leah code select kr k ctrl + /  press krna ha uncommit k leah 
+                       or new Field ka Name lhekna ha jahan nechy New field Name lkah ha
+                     */}
+
+                    {/* <View style={Style.fieldContainer}>
+                        <Text style={{ ...Typography.des, ...Style.fieldLabel }}
+                            numberOfLines={1}
+                        >
+                            New Field Name
+                        </Text>
+                        <TextInput
+                            value={newField}
+                            style={{ ...Typography.des, ...Style.fieldInput }}
+                            onChangeText={onChangeNewField}
+                        />
+                    </View> */}
                 </View>
 
                 <GButton

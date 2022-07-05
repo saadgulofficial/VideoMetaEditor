@@ -1,4 +1,4 @@
-import { View, Text, FlatList, StatusBar, PermissionsAndroid, Image, TouchableOpacity, TextInput, NativeModules } from 'react-native'
+import { View, Text, FlatList, StatusBar, PermissionsAndroid, Image, TouchableOpacity, TextInput } from 'react-native'
 import React, { useEffect, useState, useReducer } from 'react'
 import Style from './Style'
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -16,7 +16,6 @@ import { Menu, MenuItem } from 'react-native-material-menu';
 
 
 const Home = ({ navigation }) => {
-    const { ReadWrite } = NativeModules
     const [search, setSearch] = useState('')
     const [videos, setVideos] = useState([])
     const [videosTemp, setVideosTemp] = useState([])
@@ -338,22 +337,14 @@ const Home = ({ navigation }) => {
     );
 
     const onVideoPress = (item) => {
-        // console.log(item)
-        console.log(item)
-        // const data = ReadWrite.ReadMetadata(
-        //     JSON.stringify(item.image.filename)
-        // )
-        // console.log(data)
-
-
-        // hideMenu()
-        // if(search.length === 0) {
-        //     item.clipFound = null
-        //     navigation.navigate('VideoDetail', { videoDetail: item })
-        // }
-        // else {
-        //     navigation.navigate('VideoDetail', { videoDetail: item })
-        // }
+        hideMenu()
+        if(search.length === 0) {
+            item.clipFound = null
+            navigation.navigate('VideoDetail', { videoDetail: item })
+        }
+        else {
+            navigation.navigate('VideoDetail', { videoDetail: item })
+        }
     }
 
     const onClearMetaDataPress = (item) => {
