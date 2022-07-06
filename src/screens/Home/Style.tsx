@@ -19,6 +19,7 @@ export default StyleSheet.create({
     },
     videoListContainer: {
         paddingHorizontal: wp(3),
+        paddingBottom: hp(10)
     },
     videoItemContainer: {
         marginBottom: hp(5),
@@ -125,5 +126,17 @@ export default StyleSheet.create({
         alignSelf: 'center',
         textAlign: 'center',
         width: wp(70)
+    },
+    clearAllMetaDataBtn: {
+        alignSelf: 'flex-start',
+        marginLeft: wp(4),
+        marginTop: hp(-1),
+        marginBottom: hp(2),
+        paddingRight: wp(2),
+        paddingVertical: hp(1)
+    },
+    clearAllMetaDataTxt: {
+        fontSize: wp(4),
+        color: Colors.color3,
     }
 })

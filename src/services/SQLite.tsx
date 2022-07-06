@@ -138,6 +138,19 @@ class SQLiteClass {
         })
     }
 
+    clearAllMetaData = (clearQuery: { query, params }) => {
+        console.log(clearQuery)
+        return new Promise((resolve, reject) => {
+            this.executeQuery(clearQuery.query, clearQuery.params)
+                .then(() => resolve(''))
+                .catch((error) => {
+                    console.log('error while clearing all meta data ->', error)
+                    this.commonError()
+                    reject('')
+                })
+        })
+    }
+
 }
 
 

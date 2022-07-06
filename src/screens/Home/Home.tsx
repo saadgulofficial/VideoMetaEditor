@@ -1,4 +1,4 @@
-import { View, Text, FlatList, StatusBar, PermissionsAndroid, Image, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, FlatList, StatusBar, PermissionsAndroid, Image, TouchableOpacity, TextInput, Alert } from 'react-native'
 import React, { useEffect, useState, useReducer } from 'react'
 import Style from './Style'
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -373,6 +373,55 @@ const Home = ({ navigation }) => {
             })
     }
 
+    const onClearAllMetaDataPress = () => {
+        setLoader(true)
+        setLoaderMessage('Clearing All Metadata')
+
+        const clearAllMetaDataQuery = {
+            query: `DELETE FROM MetaData`,
+            params: []
+        }
+        GSQLite.clearAllMetaData(clearAllMetaDataQuery).then(() => {
+            const clearAllClipsDataQuery = {
+                query: `DELETE FROM ClipsData`,
+                params: []
+            }
+            GSQLite.clearAllMetaData(clearAllClipsDataQuery).then(() => {
+                const PATH = GFileManager.PATHS.videosPath
+                GFileManager.deleteFile(`${PATH}`).then(async () => {
+                    await getPhotos()
+                    MessageAlert('All MetaData Cleared', 'success')
+                })
+                    .catch(async () => {
+                        await getPhotos()
+                        MessageAlert('All MetaData Cleared', 'success')
+                    })
+            })
+                .catch(() => {
+                    setLoader(false)
+                })
+            // MessageAlert('All MetaData Cleared', 'success')
+        })
+            .catch(() => {
+                setLoader(false)
+            })
+    }
+
+    const showClearAllMetaDataAlert = () => {
+        Alert.alert(
+            "Clear All MetaData",
+            "Are you sure you want to clear all Metadata ?",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel"
+                },
+                { text: "OK", onPress: () => onClearAllMetaDataPress() }
+            ]
+        );
+    }
+
 
     const renderVideos = ({ item }) => {
         const { timestamp, image } = item.node
@@ -477,7 +526,11 @@ const Home = ({ navigation }) => {
                         </View>
                     </Animation>
             }
-
+            <TouchableOpacity style={Style.clearAllMetaDataBtn}
+                onPress={showClearAllMetaDataAlert}
+            >
+                <Text style={Style.clearAllMetaDataTxt}>Clear All MetaData</Text>
+            </TouchableOpacity>
             {
                 checkPermission === false &&
                 <View style={Style.permissionBtnCon}>

@@ -27,7 +27,7 @@ const VideoDetail = ({ route, navigation }) => {
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [clipNames, setClipNames] = useState([])
 
-    //@NewFieldCodeVideo nechy wali two lines new field k leah add ki hein yeh already uncommit hein
+    //@NewFieldCodeVideo =>  nechy wali two lines new field k leah add ki hein yeh already uncommit hein
     const [newField, setNewField] = useState('')
     const onChangeNewField = (text) => setNewField(text)
 
@@ -69,7 +69,7 @@ const VideoDetail = ({ route, navigation }) => {
             setClipNames(clipNames)
         }
 
-        // @NewFieldCodeVideo nechy wala code uncommit kr dena or same oper wala code commit kr dena hai 
+        // @NewFieldCodeVideo =>  nechy wala code uncommit kr dena or same oper wala code commit kr dena hai 
         // or  newFieldName jahan lkah ha 2 jagan oski jaga tmhari database mein jo column ka name lkah ha wo add kr dena ha
 
         // if(dbData) {
@@ -102,7 +102,7 @@ const VideoDetail = ({ route, navigation }) => {
             description: description,
             id: id,
             clipNames: clipNames,
-            //@NewFieldCodeVideo nechy wala code uncommit kr dena ha or field ka name jo k  : sy pehly ha wo wohi kr dena ha jo database mein add keya ha : es k bad walay ko nhi cherna
+            //@NewFieldCodeVideo => nechy wala code uncommit kr dena ha or newField name jo k  : sy pehly ha wo wohi add kr dena ha jo database mein add keya ha  : newField ha es k bad walay ko nhi cherna
             //  newField: newField
         }
         const PATH = GFileManager.PATHS.videosPath
@@ -156,7 +156,7 @@ const VideoDetail = ({ route, navigation }) => {
                     values: [startTime, endTime, videoName, people, events, location, date, description, clipNames, id]
                 }
 
-                //  @newFieldCodeVideo New field k leah nechy wala code uncommit krna ha and oper wala code commit kr dena ha var updateQuery wala code jo same code oper hai
+                //  @newFieldCodeVideo =>  Newfield k leah nechy wala code uncommit krna ha and oper wala code commit kr dena ha var updateQuery wala code jo same code oper hai
                 // or nechy jo query wali line mein newField =? lkah os  mein new field ki jagan field ka name lhekna 
                 //  ha yeh name same hona chayei DB mein jo field name add kro ge os sy and yad rhy values wala apny nhi cherna ha os mein esy he newField lkah rehny dena ha
 
