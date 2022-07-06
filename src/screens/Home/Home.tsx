@@ -382,24 +382,38 @@ const Home = ({ navigation }) => {
             params: []
         }
         GSQLite.clearAllMetaData(clearAllMetaDataQuery).then(() => {
-            const clearAllClipsDataQuery = {
-                query: `DELETE FROM ClipsData`,
+            var tableName = 'ClipsData'
+            var getQuery = {
+                query: "SELECT * FROM ClipsData",
                 params: []
             }
-            GSQLite.clearAllMetaData(clearAllClipsDataQuery).then(() => {
-                const PATH = GFileManager.PATHS.videosPath
-                GFileManager.deleteFile(`${PATH}`).then(async () => {
+            GSQLite.getData(tableName, getQuery).then(async (clipsList: any) => {
+                if(clipsList.length !== 0) {
+                    CommonServices.asyncLoop(
+                        clipsList.length, (loop) => {
+                            var index = loop.iteration();
+                            var element = clipsList[index]
+                            console.log(element)
+                            var updateQuery = {
+                                query: `UPDATE ClipsData SET startTime = ?,endTime = ? ,name = ?,
+                                                   people = ?, events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
+                                values: [element.startTime, element.endTime, element.name, '', '', '', element.date, '', element.id]
+                            }
+                            GSQLite.update(updateQuery).then(async () => {
+                                loop.next()
+                            })
+                                .catch(() => setLoader(false))
+                        }, async () => {
+                            await getPhotos()
+                            MessageAlert('All MetaData Cleared', 'success')
+                        })
+                }
+                else {
                     await getPhotos()
                     MessageAlert('All MetaData Cleared', 'success')
-                })
-                    .catch(async () => {
-                        await getPhotos()
-                        MessageAlert('All MetaData Cleared', 'success')
-                    })
+                }
             })
-                .catch(() => {
-                    setLoader(false)
-                })
+                .catch(() => setLoader(false))
         })
             .catch(() => {
                 setLoader(false)
