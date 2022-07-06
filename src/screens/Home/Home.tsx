@@ -400,7 +400,6 @@ const Home = ({ navigation }) => {
                 .catch(() => {
                     setLoader(false)
                 })
-            // MessageAlert('All MetaData Cleared', 'success')
         })
             .catch(() => {
                 setLoader(false)
