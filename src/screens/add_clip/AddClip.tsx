@@ -87,6 +87,39 @@ const AddClip = ({ route, navigation }) => {
     }
 
 
+    const saveInFileManager = (data, PATH, EXT) => {
+        return new Promise((resolve, reject) => {
+            const { id } = data
+            GFileManager.makeDirectory(PATH).then(() => {
+                GFileManager.fileExits(`${PATH}/${id}${EXT}`).then((res) => {
+                    if(res) {
+                        GFileManager.deleteFile(`${PATH}/${id}${EXT}`).then(() => {
+                            GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
+                                resolve('')
+                            }).catch((error) => {
+                                resolve('')
+                            })
+                        }).catch(() => {
+                            resolve('')
+                        })
+                    }
+                    else {
+                        GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
+                            resolve('')
+                        }).catch(() => {
+                            resolve('')
+                        })
+                    }
+                }).catch(() => {
+                    resolve('')
+                })
+            })
+                .catch(() => {
+                    resolve('')
+                })
+        })
+    }
+
     const onSavePress = () => {
         setLoader(true)
         setLoaderMessage("Saving please wait...")
@@ -130,7 +163,26 @@ const AddClip = ({ route, navigation }) => {
                         // }
 
 
-                        GSQLite.insertIntoTable(insertQuery).then(() => {
+                        GSQLite.insertIntoTable(insertQuery).then(async () => {
+                            const data = {
+                                startTime: startTime,
+                                endTime: endTime,
+                                clipName: clipName,
+                                people: people,
+                                events: events,
+                                location: location,
+                                date: date,
+                                description: description,
+                                id: id,
+                                videoId: videoId,
+                                clipUri: clipUri
+                            }
+                            const PATH = GFileManager.PATHS.clipsPath
+                            const EXT = GFileManager.EXT.ext1
+                            await saveInFileManager(data, PATH, EXT)
+                            const PATHTWO = GFileManager.PATHS.clipsPathTwo
+                            await saveInFileManager(data, PATHTWO, EXT)
+
                             var tableName = 'MetaData'
                             var getQuery = {
                                 query: "SELECT * FROM MetaData WHERE id = ?",

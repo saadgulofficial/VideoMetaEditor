@@ -47,18 +47,81 @@ const Home = ({ navigation }) => {
         setVideos(videosTemp)
     }
 
-    const mergeFileManagerData = (data) => {
+    const saveInFileManager = (data, PATH) => {
+        return new Promise((resolve, reject) => {
+            const EXT = GFileManager.EXT.ext1
+            const { id } = data
+            GFileManager.makeDirectory(PATH).then(() => {
+                GFileManager.fileExits(`${PATH}/${id}${EXT}`).then((res) => {
+                    if(res) {
+                        GFileManager.deleteFile(`${PATH}/${id}${EXT}`).then(() => {
+                            GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
+                                resolve('')
+                            }).catch((error) => {
+                                resolve('')
+                            })
+                        }).catch(() => {
+                            resolve('')
+                        })
+                    }
+                    else {
+                        GFileManager.writeFile(`${PATH}/${id}${EXT}`, data).then(() => {
+                            resolve('')
+                        }).catch(() => {
+                            resolve('')
+                        })
+                    }
+                }).catch(() => {
+                    resolve('')
+                })
+            })
+                .catch(() => {
+                    resolve('')
+                })
+        })
+    }
+
+    const restoreClips = () => {
+        const { EXT, PATHS } = GFileManager
+        var tableName = 'ClipsData'
+        var getQuery = {
+            query: "SELECT * FROM ClipsData",
+            params: []
+        }
+        GSQLite.getData(tableName, getQuery).then((clipsList: any) => {
+            clipsList.forEach(element => {
+                if(element.id) {
+                    GFileManager.readFile(`${PATHS.clipsPathTwo}/${element.id}${EXT.ext1}`)
+                        .then(async (fileData: any) => {
+                            if(fileData) {
+                                await saveInFileManager(fileData, PATHS.clipsPath)
+                                setLoaderMessage('Clip Restored')
+                            }
+                        })
+                }
+            });
+        })
+    }
+
+    const mergeFileManagerData = (data, from) => {
         const { EXT, PATHS } = GFileManager
         var videosArray: any = []
+        const path = from === 'getData' ? PATHS.videosPath : PATHS.videosPathTwo
         CommonServices.asyncLoop(
             data.length, (loop) => {
                 var index = loop.iteration();
                 var element = data[index].node
                 const { image } = element
                 const { filename } = image
-                GFileManager.readFile(`${PATHS.videosPath}/${filename.replace(/\s/g, '')}${EXT.ext1}`)
-                    .then((fileData: any) => {
+                GFileManager.readFile(`${path}/${filename.replace(/\s/g, '')}${EXT.ext1}`)
+                    .then(async (fileData: any) => {
                         if(fileData) {
+                            if(from === 'restoreAll') {
+                                const PATH = GFileManager.PATHS.videosPath
+                                await saveInFileManager(fileData, PATH)
+                                await restoreClips()
+                                Alert.alert('clip Restored')
+                            }
                             var { date, name, clipNames } = fileData
                             if(clipNames.length !== 0) {
                                 var clipNameArray: any = []
@@ -110,7 +173,8 @@ const Home = ({ navigation }) => {
             }
             GSQLite.getData(tableName, getQuery).then((videosListFromDb: any) => {
                 if(videosListFromDb.length === 0) {
-                    mergeFileManagerData(data)
+                    var from = 'getData'
+                    mergeFileManagerData(data, from)
                 }
                 else {
                     var videosArray: any = []
@@ -417,38 +481,44 @@ const Home = ({ navigation }) => {
         }
         GSQLite.clearAllMetaData(clearAllMetaDataQuery).then(() => {
             const PATH = GFileManager.PATHS.videosPath
+            const CLIPSPATH = GFileManager.PATHS.clipsPath
             GFileManager.deleteFile(`${PATH}`).then(async () => {
-                var tableName = 'ClipsData'
-                var getQuery = {
-                    query: "SELECT * FROM ClipsData",
-                    params: []
-                }
-                GSQLite.getData(tableName, getQuery).then(async (clipsList: any) => {
-                    if(clipsList.length !== 0) {
-                        CommonServices.asyncLoop(
-                            clipsList.length, (loop) => {
-                                var index = loop.iteration();
-                                var element = clipsList[index]
-                                var updateQuery = {
-                                    query: `UPDATE ClipsData SET startTime = ?,endTime = ? ,name = ?,
-                                                           people = ?, events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
-                                    values: [element.startTime, element.endTime, element.name, '', '', '', element.date, '', element.id]
-                                }
-                                GSQLite.update(updateQuery).then(async () => {
-                                    loop.next()
+                GFileManager.deleteFile(`${CLIPSPATH}`).then(async () => {
+
+                    var tableName = 'ClipsData'
+                    var getQuery = {
+                        query: "SELECT * FROM ClipsData",
+                        params: []
+                    }
+                    GSQLite.getData(tableName, getQuery).then(async (clipsList: any) => {
+                        if(clipsList.length !== 0) {
+                            CommonServices.asyncLoop(
+                                clipsList.length, (loop) => {
+                                    var index = loop.iteration();
+                                    var element = clipsList[index]
+                                    var updateQuery = {
+                                        query: `UPDATE ClipsData SET startTime = ?,endTime = ? ,name = ?,
+                                                               people = ?, events = ?, location = ?, date = ?,description = ? WHERE id = ?`,
+                                        values: [element.startTime, element.endTime, element.name, '', '', '', element.date, '', element.id]
+                                    }
+                                    GSQLite.update(updateQuery).then(async () => {
+                                        loop.next()
+                                    })
+                                        .catch(() => setLoader(false))
+                                }, async () => {
+                                    await getPhotos()
+                                    MessageAlert('All MetaData Cleared', 'success')
                                 })
-                                    .catch(() => setLoader(false))
-                            }, async () => {
-                                await getPhotos()
-                                MessageAlert('All MetaData Cleared', 'success')
-                            })
-                    }
-                    else {
-                        await getPhotos()
-                        MessageAlert('All MetaData Cleared', 'success')
-                    }
-                })
-                    .catch(() => setLoader(false))
+                        }
+                        else {
+                            await getPhotos()
+                            MessageAlert('All MetaData Cleared', 'success')
+                        }
+                    })
+                        .catch(() => setLoader(false))
+
+
+                }).catch(() => setLoader(false))
             })
                 .catch(() => setLoader(false))
         })
@@ -456,6 +526,43 @@ const Home = ({ navigation }) => {
                 setLoader(false)
             })
     }
+
+
+    const onRestoreAllMetaDataPress = () => {
+        setLoader(true)
+        setLoaderMessage('Restoring AllMetaData')
+        var from = 'restoreAll'
+        const fetchParams: any = {
+            first: 30,
+            assetType: 'Videos',
+            include: ['filename', 'fileSize', 'imageSize', 'playableDuration']
+        };
+        CameraRoll.getPhotos(fetchParams).then((data: any) => {
+            mergeFileManagerData(data.edges, from)
+            setLoaderMessage('Clip Restored')
+        }).catch((e) => {
+            setVideos(videos)
+            setVideosTemp(videos)
+            setLoader(false)
+            console.log('error while fetching videos from gallery =>', e);
+        });
+    }
+
+    const showRestoreMetaDataAlert = () => {
+        Alert.alert(
+            "Restore All MetaData",
+            "Are you sure you want to restore all Metadata ?",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel"
+                },
+                { text: "OK", onPress: () => onRestoreAllMetaDataPress() }
+            ]
+        );
+    }
+
 
     const showClearAllMetaDataAlert = () => {
         Alert.alert(
@@ -576,11 +683,20 @@ const Home = ({ navigation }) => {
                         </View>
                     </Animation>
             }
-            <TouchableOpacity style={Style.clearAllMetaDataBtn}
-                onPress={showClearAllMetaDataAlert}
-            >
-                <Text style={Style.clearAllMetaDataTxt}>Clear All MetaData</Text>
-            </TouchableOpacity>
+            <View style={Style.clearRestoreCon}>
+                <TouchableOpacity style={Style.clearAllMetaDataBtn}
+                    onPress={showClearAllMetaDataAlert}
+                >
+                    <Text style={Style.clearAllMetaDataTxt}>Clear All MetaData</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={Style.clearAllMetaDataBtn}
+                    onPress={showRestoreMetaDataAlert}
+                >
+                    <Text style={Style.clearAllMetaDataTxt}>Restore All MetaData</Text>
+                </TouchableOpacity>
+            </View>
+
             {
                 checkPermission === false &&
                 <View style={Style.permissionBtnCon}>

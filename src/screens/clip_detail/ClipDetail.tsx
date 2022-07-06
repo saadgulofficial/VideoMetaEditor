@@ -4,7 +4,7 @@ import Style from './Style'
 import { GButton, MessageAlert, Header, VideoPlayer, LoaderModal, Loader } from '../../components'
 import { hp, Typography, wp } from '../../global'
 import moment from 'moment'
-import { GSQLite } from '../../services'
+import { GFileManager, GSQLite } from '../../services'
 import DatePicker from 'react-native-date-picker'
 
 
@@ -50,25 +50,74 @@ const ClipDetail = ({ route, navigation }) => {
     const onChangeDescription = (text) => setDescription(text)
     const onPressDate = () => setShowDatePicker(true)
 
+    // const setData = () => {
+    //     const { clipDetail } = route.params
+    //     const { endTime, startTime, name, people, events, location, description } = clipDetail
+
+    //     // @NewFieldCodeClip nechy wali line uncommit kr dena ha or same oper wali line commit kr deni hai or newField ki jagan jo name ha field ka database mein wo lhekna ha
+    //     // const { endTime, startTime, name, people, events, location, description, newField} = clipDetail
+    //     setEndTime(endTime)
+    //     setStartTime(startTime)
+    //     setVideoName(name)
+    //     setDate(clipDetail.date)
+    //     setPeople(people)
+    //     setEvents(events)
+    //     setLocation(location)
+    //     setDescription(description)
+
+    //     // @NewFieldCodeClip  nechy wali line uncommit krni ha or newField mein wo name lhekna ha to database mein ha name
+    //     // setNewField(newField)
+    //     setLoader(false)
+    // }
+
     const setData = () => {
         const { clipDetail } = route.params
-        const { endTime, startTime, name, people, events, location, description } = clipDetail
-
-        // @NewFieldCodeClip nechy wali line uncommit kr dena ha or same oper wali line commit kr deni hai or newField ki jagan jo name ha field ka database mein wo lhekna ha
-        // const { endTime, startTime, name, people, events, location, description, newField} = clipDetail
-        setEndTime(endTime)
-        setStartTime(startTime)
-        setVideoName(name)
-        setDate(clipDetail.date)
-        setPeople(people)
-        setEvents(events)
-        setLocation(location)
-        setDescription(description)
-
-        // @NewFieldCodeClip  nechy wali line uncommit krni ha or newField mein wo name lhekna ha to database mein ha name
-        // setNewField(newField)
-        setLoader(false)
+        const { id } = clipDetail
+        const path = GFileManager.PATHS.clipsPath
+        const EXT = GFileManager.EXT
+        GFileManager.readFile(`${path}/${id}${EXT.ext1}`)
+            .then(async (fileData: any) => {
+                if(fileData) {
+                    const { startTime, endTime, clipName, people, events, location, description } = fileData
+                    setEndTime(endTime)
+                    setStartTime(startTime)
+                    setVideoName(clipName)
+                    setDate(fileData.date)
+                    setPeople(people)
+                    setEvents(events)
+                    setLocation(location)
+                    setDescription(description)
+                    setLoader(false)
+                }
+                else {
+                    const { endTime, startTime, name, people, events, location, description } = clipDetail
+                    setEndTime(endTime)
+                    setStartTime(startTime)
+                    setVideoName(name)
+                    setDate(clipDetail.date)
+                    setPeople(people)
+                    setEvents(events)
+                    setLocation(location)
+                    setDescription(description)
+                    setLoader(false)
+                }
+            })
+            .catch((err) => {
+                const { endTime, startTime, name, people, events, location, description } = clipDetail
+                setEndTime(endTime)
+                setStartTime(startTime)
+                setVideoName(name)
+                setDate(clipDetail.date)
+                setPeople(people)
+                setEvents(events)
+                setLocation(location)
+                setDescription(description)
+                setLoader(false)
+            })
     }
+
+
+
     useEffect(() => {
         const clean = setData()
         return () => clean

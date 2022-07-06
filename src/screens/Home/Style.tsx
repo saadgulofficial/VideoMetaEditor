@@ -138,5 +138,11 @@ export default StyleSheet.create({
     clearAllMetaDataTxt: {
         fontSize: wp(4),
         color: Colors.color3,
+    },
+    clearRestoreCon: {
+        flexDirection: 'row',
+        justifyContent: "space-between",
+        alignItems: 'center',
+        paddingRight: hp(4)
     }
 })

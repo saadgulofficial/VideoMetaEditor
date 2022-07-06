@@ -6,7 +6,9 @@ class FileManagerClass {
     PATHS = {
         directoryPath: `${RNFS.DownloadDirectoryPath}/VideoMetaData`,
         videosPath: `${RNFS.DownloadDirectoryPath}/VideoMetaData/Videos`,
+        videosPathTwo: `${RNFS.DownloadDirectoryPath}/VideoMetaData/VideosBackup`,
         clipsPath: `${RNFS.DownloadDirectoryPath}/VideoMetaData/Clips`,
+        clipsPathTwo: `${RNFS.DownloadDirectoryPath}/VideoMetaData/ClipsBackup`,
     }
     EXT = {
         ext1: '.jpg'
